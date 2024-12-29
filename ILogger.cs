@@ -22,23 +22,30 @@
         Gameplay
     }
 
+    /// <summary>
+    /// This logger is implemented by end user like Unity Logger implementation.
+    /// </summary>
     public interface ILogger
     {
         void Log(object sender, string message, Category category = Category.Default, LogLevel logLevel = LogLevel.Debug, bool withStackTrace = false);
     }
 
+    /// <summary>
+    /// This logger is and extension method that can be used by every instance or called on static functions arguments.
+    /// It simplify logging to this.Log(...) calls.
+    /// </summary>
     public static class Logger
     {
-        private static ILogger _logger = null!;
+        private static ILogger LOGGER = null!;
 
-        public static void InitLogger(ILogger logger)
+        internal static void InitLogger(ILogger logger)
         {
-            _logger = logger;
+            LOGGER = logger;
         }
 
         public static void Log(this object sender, string message, Category category = Category.Default, LogLevel logLevel = LogLevel.Debug, bool withStackTrace = false)
         {
-            _logger?.Log(sender, message, category, logLevel, withStackTrace);
+            LOGGER?.Log(sender, message, category, logLevel, withStackTrace);
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Autofac;
 
 namespace BIG
@@ -27,7 +29,9 @@ namespace BIG
             }
 
             _container = builder.Build();
+            AssertRequiredRegistrations();
 
+            // Initiate static Logger with ILogger implementation provided by end user.
             Logger.InitLogger(God.PrayFor<ILogger>());
             typeof(God).Log($"World created - {modules.Count} modules registered.", Category.Default, LogLevel.Editor);
         }
@@ -78,5 +82,39 @@ namespace BIG
             PrayFor<IList<IDisposable>>().Each(c => c?.Dispose());
         }
 
+        /// <summary>
+        /// Make sure that all the classes marked with <see cref="RegistrationRequiredAttribute"/> are registered.
+        /// </summary>
+        private static void AssertRequiredRegistrations()
+        {
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                IEnumerable<Type> typesToRegister;
+                try
+                {
+                    typesToRegister = assembly.GetTypes().Where(t => t.IsDefined(typeof(RegistrationRequiredAttribute)));
+                }
+                catch
+                {
+                    // Ignore types loading exception
+                    continue;
+                }
+
+                foreach (Type t in typesToRegister)
+                {
+                    try
+                    {
+                        var instance = PrayFor(t);
+                        if (instance == null)
+                            throw new Exception("Type not registered. Resolved null instance.");
+                    }
+                    catch (Exception e)
+                    {
+                        _container!.Log($"{t.FullName} not implemented. You need to register this type before other dependencies are resolved.", Category.Default, LogLevel.Info);
+                        _container!.Log($"{t.FullName} can't be resolved.\n{e.Message}\n{e.StackTrace}", Category.Default, LogLevel.Error);
+                    }
+                }
+            }
+        }
     }
 }

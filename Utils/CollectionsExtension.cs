@@ -509,6 +509,8 @@ namespace BIG
             {
                 listCount--;
                 int k = Random.Next(listCount + 1);
+                // ReSharper disable once SwapViaDeconstruction
+                // (list[k], list[listCount]) = (list[listCount], list[k]); <- unreadable.
                 T value = list[k];
                 list[k] = list[listCount];
                 list[listCount] = value;
