@@ -1,0 +1,12 @@
+{
+  "name": "com.big-ice-games.big",
+  "version": "1.0.0",
+  "displayName": "Big Ice Games Library",
+  "description": "A .NET Standard 2.1 library for Unity projects provided by Big Ice Games [BIG].",
+  "unity": "6000.0",
+  "author": {
+    "name": "Big Ice Games",
+    "email": "office@bigicegames.com",
+    "url": "https://bigicegames.com"
+  }
+}
