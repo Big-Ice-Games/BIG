@@ -74,3 +74,20 @@ Avoiding code duplication, we keep extensions with broad applications here and u
 
 ## <a href="https://github.com/Big-Ice-Games/BIG/tree/main/Runtime/Types" target="_blank">`Types`</a>
 To maintain consistency of base types across applications, we build a repository of useful classes such as vectors, colors, etc.
+
+## DLL 
+files ready to use in Unity projects are available at the following URLs:
+
+https://github.com/Big-Ice-Games/BIG/raw/refs/heads/main/bin/Release/netstandard2.1/Autofac.dll
+https://github.com/Big-Ice-Games/BIG/raw/refs/heads/main/bin/Release/netstandard2.1/BIG.dll
+
+bin/debug and bin/release are not a part of the .gitignore because of that.
+The latest version of BIG should be available ready to use without having to download the entire repository and build it yourself.
+
+The process of using and updating can be automated in a project with a class like this:
+
+```
+
+[ToDo]
+
+```
