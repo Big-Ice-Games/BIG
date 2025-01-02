@@ -78,7 +78,7 @@ To maintain consistency of base types across applications, we build a repository
 ## DLL 
 files ready to use in Unity projects are available at the following URLs:
 
-https://github.com/Big-Ice-Games/BIG/raw/refs/heads/main/bin/Release/netstandard2.1/Autofac.dll
+https://github.com/Big-Ice-Games/BIG/raw/refs/heads/main/bin/Release/netstandard2.1/Autofac.dll</br>
 https://github.com/Big-Ice-Games/BIG/raw/refs/heads/main/bin/Release/netstandard2.1/BIG.dll
 
 bin/debug and bin/release are not a part of the .gitignore because of that.
