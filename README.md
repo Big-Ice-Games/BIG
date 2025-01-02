@@ -88,6 +88,58 @@ The process of using and updating can be automated in a project with a class lik
 
 ```
 
-[ToDo]
+using UnityEngine;
+using UnityEditor;
+using System.IO;
+using UnityEngine.Networking;
+
+namespace Editor
+{
+    public class BigIceGamesRepositoryProvider : EditorWindow
+    {
+        private const string AutofacUrl = "https://github.com/Big-Ice-Games/BIG/raw/refs/heads/main/bin/Release/netstandard2.1/Autofac.dll";
+        private const string BigUrl = "https://github.com/Big-Ice-Games/BIG/raw/refs/heads/main/bin/Release/netstandard2.1/BIG.dll";
+        private const string AutofacDestinationPath = "Assets/Plugins/BigIceGames/Autofac.dll";
+        private const string BigDestinationPath = "Assets/Plugins/BigIceGames/BIG.dll";
+
+        [MenuItem("BIG/Update BIG dlls")]
+        public static void UpdateBigDlls()
+        {
+            DownloadFile(AutofacUrl, AutofacDestinationPath);
+            DownloadFile(BigUrl, BigDestinationPath);
+        }
+
+        public static void DownloadFile(string fileUrl, string destinationPath)
+        {
+            var directory = Path.GetDirectoryName(destinationPath);
+            var file = Path.GetFileName(destinationPath);
+
+            EditorUtility.DisplayProgressBar("Downloading File", $"Fetching {file}...", 0.5f);
+
+            var webRequest = UnityWebRequest.Get(fileUrl);
+            var operation = webRequest.SendWebRequest();
+
+            operation.completed += _ =>
+            {
+                if (webRequest.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.LogError($"Error downloading file: {webRequest.error}");
+                }
+                else
+                {
+                    if (!Directory.Exists(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+
+                    File.WriteAllBytes(destinationPath, webRequest.downloadHandler.data);
+                    Debug.Log($"File downloaded successfully to: {destinationPath}");
+                }
+
+                EditorUtility.ClearProgressBar();
+            };
+        }
+    }
+}
 
 ```
