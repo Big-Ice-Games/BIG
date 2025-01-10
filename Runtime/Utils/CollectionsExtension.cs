@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using BIG.Types;
 
 namespace BIG
 {
@@ -635,6 +636,20 @@ namespace BIG
             return x + y * arrayLength;
         }
 
+        #region Colors
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Color Randomize(this Color color)
+        {
+            return new Color(
+                Random.MemoryFriendlyRandomByte(),
+                Random.MemoryFriendlyRandomByte(),
+                Random.MemoryFriendlyRandomByte(),
+                color.Alpha);
+        }
+
+        #endregion
+
         /// <summary>
         /// Random implementation that works for Mono.
         /// </summary>
@@ -666,6 +681,8 @@ namespace BIG
             }
 
             public static int MemoryFriendlyRandom(int value1, int value2) => _persistentRandom.Next(value1, value2);
+
+            public static byte MemoryFriendlyRandomByte() => (byte)_persistentRandom.Next(0, 256);
 
             public static int Range(int value1, int value2)
             {
