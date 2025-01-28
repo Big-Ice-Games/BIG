@@ -47,5 +47,10 @@
         {
             LOGGER?.Log(sender, message, category, logLevel, withStackTrace);
         }
+
+        public static void Log(this object sender, string message, LogLevel logLevel = LogLevel.Debug, bool withStackTrace = false)
+        {
+            LOGGER?.Log(sender, message, Category.Default, logLevel, withStackTrace);
+        }
     }
 }
