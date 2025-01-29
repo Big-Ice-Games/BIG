@@ -1,18 +1,22 @@
-﻿namespace BIG.Network
+﻿using Steamworks;
+
+namespace BIG.Network
 {
     internal sealed class SteamLobby
     {
-        // protected Callback<LobbyEnter_t> LobbyEnteredCallback;
-        // protected Callback<LobbyCreated_t> LobbyCreatedCallback;
-        // protected Callback<LobbyMatchList_t> GetLobbiesCallback;
-        // protected Callback<GameRichPresenceJoinRequested_t> JoinSomeoneElseLobbyRequestedCallback;
-        // protected Callback<PersonaStateChange_t> PersonaStateChangedCallback;
-        // protected Callback<LobbyChatUpdate_t> LobbyChatUpdated;
-        // protected Callback<GameLobbyJoinRequested_t> LobbyJoinRequestedCallback;
-        // protected Callback<LobbyDataUpdate_t> GetLobbyDataCallback;
-        // protected Callback<P2PSessionRequest_t> P2PSessionRequestCallback;
-        // //protected Callback<GameServerChangeRequested_t> GameServerChangeRequestedCallback;
-        // //protected Callback<NumberOfCurrentPlayers_t> NumberOfCurrentPlayersCallback;
+        public CSteamID LobbyId { get; private set; }
+
+        protected Callback<LobbyEnter_t> LobbyEnteredCallback;
+        protected Callback<LobbyCreated_t> LobbyCreatedCallback;
+        protected Callback<LobbyMatchList_t> GetLobbiesCallback;
+        protected Callback<GameRichPresenceJoinRequested_t> JoinSomeoneElseLobbyRequestedCallback;
+  
+        protected Callback<LobbyChatUpdate_t> LobbyChatUpdated;
+        protected Callback<GameLobbyJoinRequested_t> LobbyJoinRequestedCallback;
+        protected Callback<LobbyDataUpdate_t> GetLobbyDataCallback;
+        protected Callback<P2PSessionRequest_t> P2PSessionRequestCallback;
+        protected Callback<GameServerChangeRequested_t> GameServerChangeRequestedCallback;
+        protected Callback<NumberOfCurrentPlayers_t> NumberOfCurrentPlayersCallback;
     }
 }
 
