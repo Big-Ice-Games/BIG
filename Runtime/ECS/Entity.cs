@@ -1,4 +1,11 @@
-﻿namespace BIG
+﻿#region license
+
+// Copyright (c) 2025, Big Ice Games
+// All rights reserved.
+
+#endregion
+
+namespace BIG
 {
     /// <summary>
     /// Because <see cref="Entity"/> is a structure to understand which entity INDEX is not used we need a state.

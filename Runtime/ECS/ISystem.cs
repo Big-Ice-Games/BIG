@@ -1,4 +1,11 @@
-﻿using System;
+﻿#region license
+
+// Copyright (c) 2025, Big Ice Games
+// All rights reserved.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 
 namespace BIG

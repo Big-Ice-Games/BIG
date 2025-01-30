@@ -2,21 +2,19 @@
 
 namespace BIG.Network
 {
-    internal sealed class SteamLobby
+    [Register(true)]
+    internal sealed class BigSteamLobby
     {
-        public CSteamID LobbyId { get; private set; }
+        public CSteamID? LobbyId { get; private set; }
 
         protected Callback<LobbyEnter_t> LobbyEnteredCallback;
         protected Callback<LobbyCreated_t> LobbyCreatedCallback;
         protected Callback<LobbyMatchList_t> GetLobbiesCallback;
-        protected Callback<GameRichPresenceJoinRequested_t> JoinSomeoneElseLobbyRequestedCallback;
-  
+        protected Callback<GameRichPresenceJoinRequested_t> GameRichPresenceJoinRequestedCallback;
         protected Callback<LobbyChatUpdate_t> LobbyChatUpdated;
-        protected Callback<GameLobbyJoinRequested_t> LobbyJoinRequestedCallback;
-        protected Callback<LobbyDataUpdate_t> GetLobbyDataCallback;
-        protected Callback<P2PSessionRequest_t> P2PSessionRequestCallback;
+        protected Callback<GameLobbyJoinRequested_t> GameLobbyJoinRequestedCallback;
+        protected Callback<LobbyDataUpdate_t> LobbyDataUpdateCallback;
         protected Callback<GameServerChangeRequested_t> GameServerChangeRequestedCallback;
-        protected Callback<NumberOfCurrentPlayers_t> NumberOfCurrentPlayersCallback;
     }
 }
 
@@ -94,7 +92,7 @@ namespace BIG.Network
     //    public const byte REQUEST_IDENTIFIER = 173;
     //}
 
-    //public class SteamLobby : SpookedBehaviour
+    //public class BigSteamLobby : SpookedBehaviour
     //{
         // private Dictionary<ulong, SteamFriend> _friends;
         // private List<CSteamID> _steamRoomMembers;
@@ -175,13 +173,13 @@ namespace BIG.Network
         //// protected Callback<LobbyEnter_t> LobbyEnteredCallback;
         //// protected Callback<LobbyCreated_t> LobbyCreatedCallback;
         //// //protected Callback<LobbyMatchList_t> GetLobbiesCallback;
-        //// protected Callback<GameRichPresenceJoinRequested_t> JoinSomeoneElseLobbyRequestedCallback;
+        //// protected Callback<GameRichPresenceJoinRequested_t> GameRichPresenceJoinRequestedCallback;
         //protected Callback<PersonaStateChange_t> PersonaStateChangedCallback;
         // protected Callback<LobbyChatUpdate_t> LobbyChatUpdated;
         // //protected Callback<getfri>
         //
-        // protected Callback<GameLobbyJoinRequested_t> LobbyJoinRequestedCallback;
-        // protected Callback<LobbyDataUpdate_t> GetLobbyDataCallback;
+        // protected Callback<GameLobbyJoinRequested_t> GameLobbyJoinRequestedCallback;
+        // protected Callback<LobbyDataUpdate_t> LobbyDataUpdateCallback;
         // protected Callback<P2PSessionRequest_t> P2PSessionRequestCallback;
         //
         // //protected Callback<GameServerChangeRequested_t> GameServerChangeRequestedCallback;
@@ -202,10 +200,10 @@ namespace BIG.Network
         //    //
         //    //     LobbyEnteredCallback = Callback<LobbyEnter_t>.Create(OnLobbyEnteredCallback);
         //    //     LobbyCreatedCallback = Callback<LobbyCreated_t>.Create(OnLobbyCreatedCallback);
-        //    //     JoinSomeoneElseLobbyRequestedCallback = Callback<GameRichPresenceJoinRequested_t>.Create(OnJoinSomeoneElseLobbyRequestedCallback);
+        //    //     GameRichPresenceJoinRequestedCallback = Callback<GameRichPresenceJoinRequested_t>.Create(OnJoinSomeoneElseLobbyRequestedCallback);
         //    PersonaStateChangedCallback = Callback<PersonaStateChange_t>.Create(OnPersonaStateChangedCallback);
         //    //     LobbyChatUpdated = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdated);
-        //    //     LobbyJoinRequestedCallback = Callback<GameLobbyJoinRequested_t>.Create(OnLobbyJoinRequestedCallback);
+        //    //     GameLobbyJoinRequestedCallback = Callback<GameLobbyJoinRequested_t>.Create(OnLobbyJoinRequestedCallback);
         //    //     P2PSessionRequestCallback = Callback<P2PSessionRequest_t>.Create(OnP2PSessionRequest);
         //}
         //
@@ -251,7 +249,7 @@ namespace BIG.Network
         //    //     Publish(new SpookedFriendsRefreshedFullEvent(_friends.Select(s => s.Value).ToList())));
         //}
         //
-        // public async Task GetFriends()
+        // public async Task RefreshFriends()
         // {
         //     int friendsCount = SteamFriends.GetFriendCount(EFriendFlags.k_EFriendFlagImmediate);
         //     List<SteamFriend> friends = new List<SteamFriend>(friendsCount);
@@ -618,10 +616,10 @@ namespace BIG.Network
         //     base.BeforeDispose();
         //     LobbyEnteredCallback?.Dispose();
         //     LobbyCreatedCallback?.Dispose();
-        //     JoinSomeoneElseLobbyRequestedCallback?.Dispose();
+        //     GameRichPresenceJoinRequestedCallback?.Dispose();
         //     PersonaStateChangedCallback?.Dispose();
-        //     LobbyJoinRequestedCallback?.Dispose();
-        //     GetLobbyDataCallback?.Dispose();
+        //     GameLobbyJoinRequestedCallback?.Dispose();
+        //     LobbyDataUpdateCallback?.Dispose();
         //     LobbyChatUpdated?.Dispose();
         //
         //     StopAcceptingConnections();

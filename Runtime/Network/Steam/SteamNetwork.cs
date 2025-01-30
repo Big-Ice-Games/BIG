@@ -4,7 +4,8 @@ using Steamworks;
 
 namespace BIG.Network
 {
-    internal sealed class SteamNetwork: IDisposable
+    [Register(true)]
+    internal sealed class BigSteamNetwork: IDisposable
     {
         private const int CHANNEL = 0;
         private readonly object _sendLocker;
@@ -14,20 +15,36 @@ namespace BIG.Network
         private readonly Queue<NetworkRequest> _incomingRequest;
         private readonly Callback<P2PSessionRequest_t> _sessionRequestCallback;
         private readonly Callback<P2PSessionConnectFail_t> _connectedFailCallback;
+        private readonly HashSet<ulong> _acceptingConnectionsFrom;
 
-        internal SteamNetwork()
+        internal BigSteamNetwork()
         {
             _sendLocker = new object();
             _receiveLocker = new object();
             _outgoingUnreliableRequests = new Queue<NetworkRequest>();
             _outgoingReliableRequests = new Queue<NetworkRequest>();
             _incomingRequest = new Queue<NetworkRequest>();
-
+            _acceptingConnectionsFrom = new HashSet<ulong>();
             _sessionRequestCallback = Callback<P2PSessionRequest_t>.Create(OnP2PSessionRequest);
             _connectedFailCallback = Callback<P2PSessionConnectFail_t>.Create(OnP2PSessionConnectFail);
         }
 
-        private void OnP2PSessionRequest(P2PSessionRequest_t callback) => SteamNetworking.AcceptP2PSessionWithUser(callback.m_steamIDRemote);
+        private void OnP2PSessionRequest(P2PSessionRequest_t callback)
+        {
+            if (_acceptingConnectionsFrom.Contains(callback.m_steamIDRemote.m_SteamID)) return;
+            SteamNetworking.AcceptP2PSessionWithUser(callback.m_steamIDRemote);
+            _acceptingConnectionsFrom.Add(callback.m_steamIDRemote.m_SteamID);
+        }
+
+        private void CloseSessions()
+        {
+            foreach (ulong user in _acceptingConnectionsFrom)
+            {
+                SteamNetworking.CloseP2PSessionWithUser(new CSteamID(user));
+            }
+            _acceptingConnectionsFrom.Clear();
+        }
+
         private void OnP2PSessionConnectFail(P2PSessionConnectFail_t callback) => this.Log($"Failed to connect with player {callback.m_steamIDRemote} with error: {callback.m_eP2PSessionError}", Category.Networking,  LogLevel.Error);
 
         /// <summary>
@@ -104,7 +121,7 @@ namespace BIG.Network
         {
             _sessionRequestCallback.Dispose();
             _connectedFailCallback.Dispose();
-            SteamNetworking.CloseP2PSessionWithUser(SteamUser.GetSteamID());
+            CloseSessions();
         }
     }
 }
