@@ -1,4 +1,11 @@
-﻿namespace BIG.Types
+﻿#region license
+
+// Copyright (c) 2025, Big Ice Games
+// All rights reserved.
+
+#endregion
+
+namespace BIG.Types
 {
     [Preserve]
     public sealed class Color
