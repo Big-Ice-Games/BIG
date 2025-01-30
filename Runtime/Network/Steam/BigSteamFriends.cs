@@ -39,8 +39,7 @@ namespace BIG.Network
         public void RefreshFriends()
         {
             int friendsCount = SteamFriends.GetFriendCount(EFriendFlags.k_EFriendFlagImmediate);
-            List<SteamFriend> friends = new List<SteamFriend>(friendsCount);
-
+            
             // Avoid refreshing multiple time
             // especially for the first call of this function.
             bool shouldRefresh = false;
@@ -55,7 +54,7 @@ namespace BIG.Network
 
                 SteamFriend newFriend = new SteamFriend() { SteamId = friendSteamId };
                 RefreshFriend(newFriend);
-                friends.Add(newFriend);
+                Friends.Add(newFriend);
                 shouldRefresh = true; // New friend was added to the list.
             }
 
