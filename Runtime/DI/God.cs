@@ -134,7 +134,7 @@ namespace BIG
                     }
                     catch (Exception e)
                     {
-                        _container!.Log($"{t.FullName} not implemented. You need to register this type before other dependencies are resolved.", Category.Default, LogLevel.Info);
+                        _container!.Log($"{t.FullName} not implemented. You need to register this type before other dependencies are resolved.", LogLevel.Info);
                         _container!.Log($"{t.FullName} can't be resolved.\n{e.Message}\n{e.StackTrace}", LogLevel.Error);
                     }
                 }

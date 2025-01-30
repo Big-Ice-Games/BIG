@@ -14,19 +14,9 @@ namespace BIG
         Warning,
         Error,
         ToDo,
-        Editor
-    }
-
-    public enum Category
-    {
-        Default,
-        Sound,
-        UI,
-        IO,
-        Networking,
-        Benchmark,
-        Services,
-        Gameplay
+        Editor,
+        NetworkInfo,
+        NetworkError
     }
 
     /// <summary>
@@ -34,7 +24,7 @@ namespace BIG
     /// </summary>
     public interface ILogger
     {
-        void Log(object sender, string message, Category category = Category.Default, LogLevel logLevel = LogLevel.Debug, bool withStackTrace = false);
+        void Log(object sender, string message, LogLevel logLevel = LogLevel.Debug, bool withStackTrace = false);
     }
 
     /// <summary>
@@ -50,14 +40,9 @@ namespace BIG
             LOGGER = logger;
         }
 
-        public static void Log(this object sender, string message, Category category = Category.Default, LogLevel logLevel = LogLevel.Debug, bool withStackTrace = false)
+        public static void Log(this object sender, string message, LogLevel logLevel = LogLevel.Debug, bool withStackTrace = false)
         {
-            LOGGER?.Log(sender, message, category, logLevel, withStackTrace);
-        }
-
-        public static void Log(this object sender, string message,  LogLevel logLevel = LogLevel.Debug, bool withStackTrace = false)
-        {
-            LOGGER?.Log(sender, message, Category.Default, logLevel, withStackTrace);
+            LOGGER?.Log(sender, message, logLevel, withStackTrace);
         }
     }
 }
