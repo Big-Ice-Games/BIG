@@ -12,7 +12,7 @@ using LiteNetLib.Utils;
 namespace BIG.Types
 {
     /// <summary>
-    /// Chunk is used to store entities in 2 dimensional space for optimization purposes like network synchronization.
+    /// Chunk is used to store entities in 2-dimensional space for optimization purposes like network synchronization.
     /// </summary>
     [Serializable]
     public struct Chunk : IEquatable<Chunk>, INetSerializable
