@@ -21,6 +21,23 @@ namespace BIG
         private static IContainer? _container;
 
         public static void WorldCreation(
+            ILogger logger)
+        {
+            ContainerBuilder builder = new ContainerBuilder();
+
+            builder.Register(c => logger)
+                .As<ILogger>()
+                .Keyed<object>(typeof(ILogger).FullName).SingleInstance();
+
+            StandaloneRegistration(builder);
+
+            _container = builder.Build();
+
+            Logger.InitLogger(God.PrayFor<ILogger>());
+            typeof(God).Log("World created.", LogLevel.Editor);
+        }
+
+        public static void WorldCreation(
             ILogger logger,
             AssemblyModule? preRegistrationModule)
         {
