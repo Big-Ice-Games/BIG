@@ -116,6 +116,7 @@ namespace BIG
         public override string ToString() => $"{X:F}:{Y:F}";
 
         #region Serialization
+
         public void Serialize(NetDataWriter writer)
         {
             writer.Put(X);

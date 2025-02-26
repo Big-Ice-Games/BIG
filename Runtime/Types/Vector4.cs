@@ -126,12 +126,13 @@ namespace BIG
 		}
 
         #region Serializable
+
         public void Serialize(NetDataWriter writer)
         {
             writer.Put(X);
             writer.Put(Y);
             writer.Put(Z);
-			writer.Put(W);
+            writer.Put(W);
         }
 
         public void Deserialize(NetDataReader reader)
@@ -139,7 +140,7 @@ namespace BIG
             X = reader.GetFloat();
             Y = reader.GetFloat();
             Z = reader.GetFloat();
-			W = reader.GetFloat();
+            W = reader.GetFloat();
         }
         #endregion
     }
