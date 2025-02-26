@@ -6,6 +6,7 @@
 #endregion
 
 using System;
+
 // ReSharper disable InvalidXmlDocComment
 
 namespace BIG
