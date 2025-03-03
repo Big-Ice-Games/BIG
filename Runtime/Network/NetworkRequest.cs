@@ -11,7 +11,7 @@ namespace BIG.Network
 {
     public interface IRequest : INetSerializable
     {
-        NetworkRequest ToRequest();
+        NetworkRequest ToRequest(int frame);
     }
 
     /// <summary>

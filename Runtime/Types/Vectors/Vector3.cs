@@ -17,11 +17,14 @@ namespace BIG
 	[Serializable]
     public struct Vector3 : INetSerializable
     {
+        public static readonly Vector3 Zero = new Vector3(0, 0, 0);
+        public static readonly Vector3 One = new Vector3(1, 1, 1);
+
         [Preserve] public float X;
         [Preserve] public float Y;
         [Preserve] public float Z;
 
-        [Preserve]
+		[Preserve]
         public Vector3(float x, float y, float z)
 		{
 			X = x;
@@ -29,21 +32,28 @@ namespace BIG
 			Z = z;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Is_XY_Zero()
-		{
-			return X == 0 && Y == 0;
-		}
+        #region Utils
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Vector3 Normalized()
-		{
-			float magnitude = (float)Math.Sqrt(X * X + Y * Y + Z * Z);
-			return new Vector3(X / magnitude, Y / magnitude, Z / magnitude);
-		}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override string ToString()
+        {
+            return $"{X:F}:{Y:F}:{Z:F}";
+        }
 
-		#region Operators
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Is_XY_Zero() => X == 0 && Y == 0;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector3 Normalized()
+        {
+            float magnitude = (float)Math.Sqrt(X * X + Y * Y + Z * Z);
+            return new Vector3(X / magnitude, Y / magnitude, Z / magnitude);
+        }
+
+        #endregion
+
+        #region Operators
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3 operator -(Vector3 vec1, Vector3 vec2)
 		{
 			return new Vector3(vec1.X - vec2.X, vec1.Y - vec2.Y, vec1.Z - vec2.Z);
@@ -110,12 +120,6 @@ namespace BIG
 			}
 		}
         #endregion
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override string ToString()
-		{
-			return $"{X:F}:{Y:F}:{Z:F}";
-		}
 
         #region Serializable
         public void Serialize(NetDataWriter writer)

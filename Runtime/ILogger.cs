@@ -29,7 +29,7 @@ namespace BIG
 
     /// <summary>
     /// This logger is and extension method that can be used by every instance or called on static functions arguments.
-    /// It simplify logging to this.Log(...) calls.
+    /// It simplifies logging to this.Log(...) calls.
     /// </summary>
     public static class Logger
     {

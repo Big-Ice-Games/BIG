@@ -4,6 +4,7 @@
 // All rights reserved.
 
 #endregion
+
 // ReSharper disable InvalidXmlDocComment
 namespace BIG
 {
