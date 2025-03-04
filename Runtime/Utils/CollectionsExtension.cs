@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace BIG
+namespace BIG.Utils
 {
     /// <summary>
     /// Class contains extensions from IEnumerable, IList, arrays and enums.
@@ -641,20 +641,6 @@ namespace BIG
         {
             return x + y * arrayLength;
         }
-
-        #region Colors
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Color Randomize(this Color color)
-        {
-            return new Color(
-                Random.MemoryFriendlyRandomByte(),
-                Random.MemoryFriendlyRandomByte(),
-                Random.MemoryFriendlyRandomByte(),
-                color.Alpha);
-        }
-
-        #endregion
 
         /// <summary>
         /// Random implementation that works for Mono.
