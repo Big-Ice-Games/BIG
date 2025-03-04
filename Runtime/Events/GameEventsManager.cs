@@ -11,9 +11,24 @@ using System.Linq;
 
 namespace BIG.Events
 {
+    internal class EventSubscriber
+    {
+        /// <summary>
+        /// Lower priority are handled first.
+        /// </summary>
+        public int Priority;
+
+        public EventHandler EventHandler;
+
+        public EventSubscriber(int priority, EventHandler eventHandler)
+        {
+            Priority = priority;
+            EventHandler = eventHandler;
+        }
+    }
     public static class GameEventsManager
     {
-        private static readonly Dictionary<string, IList<EventHandler>> EVENTS_SUBSCRIBERS = new Dictionary<string, IList<EventHandler>>(64);
+        private static readonly Dictionary<string, IList<EventSubscriber>> EVENTS_SUBSCRIBERS = new Dictionary<string, IList<EventSubscriber>>(64);
 
         /// <summary>
 		/// Clear event subscriptions.
@@ -27,34 +42,39 @@ namespace BIG.Events
         /// GMSubscribe for T type of event.
         /// </summary>
         /// <typeparam name="T">Type of event you want to subscribe for.</typeparam>
+        /// <param name="priority">Priority for subscription. Lower priority are handled first.</param>
         /// <param name="handler">Event handler that receive this event.</param>
-        public static void Subscribe<T>(EventHandler handler) where T : Event
+        public static void Subscribe<T>(int priority, EventHandler handler) where T : Event
         {
             string key = typeof(T).FullName;
-            InternalSubscription(key, handler);
+            InternalSubscription(key, new EventSubscriber(priority, handler));
         }
 
         /// <summary>
         /// Non-generic subscription used by DI module.
         /// </summary>
         /// <param name="T">Event type.</param>
+        /// /// <param name="priority">Priority for subscription. Lower priority are handled first.</param>
         /// <param name="handler">Handle for this event.</param>
-        public static void Subscribe(Type T, EventHandler handler)
+        public static void Subscribe(Type T, int priority, EventHandler handler)
         {
             string key = T.FullName;
-            InternalSubscription(key, handler);
+            InternalSubscription(key, new EventSubscriber(priority, handler));
         }
 
-        private static void InternalSubscription(string key, EventHandler handler)
+        private static void InternalSubscription(string key, EventSubscriber handler)
         {
             if (!EVENTS_SUBSCRIBERS.ContainsKey(key))
             {
-                EVENTS_SUBSCRIBERS.Add(key, new List<EventHandler>());
+                EVENTS_SUBSCRIBERS.Add(key, new List<EventSubscriber>());
             }
 
-            if (!EVENTS_SUBSCRIBERS[key].Contains(handler))
+            if (EVENTS_SUBSCRIBERS[key].All(s => s.EventHandler != handler.EventHandler))
             {
                 EVENTS_SUBSCRIBERS[key].Add(handler);
+
+                // Sort list of subscribers by priority. 
+                EVENTS_SUBSCRIBERS[key] = EVENTS_SUBSCRIBERS[key].OrderBy(s => s.Priority).ToList();
             }
         }
 
@@ -82,7 +102,14 @@ namespace BIG.Events
         {
             if (EVENTS_SUBSCRIBERS.TryGetValue(key, out var value))
             {
-                value.Remove(handler);
+                for (int i = 0; i < value.Count; i++)
+                {
+                    if (value[i].EventHandler == handler)
+                    {
+                        value.RemoveAt(i);
+                        return;
+                    }
+                }
             }
         }
 
@@ -106,15 +133,14 @@ namespace BIG.Events
                 // Get copy of the list of subscribers
                 var tmp = EVENTS_SUBSCRIBERS[key].ToList();
 
-                // Iterate from the last subscriber to the first one.
-                for (int i = tmp.Count - 1; i >= 0; i--)
+                for (int i = 0; i < tmp.Count; i++)
                 {
                     // If no one already consumed this event
                     if (!e.Consumed)
                     {
                         // If subscriber wasn't removed from the subscribers in meantime
                         if (EVENTS_SUBSCRIBERS[key].Contains(tmp[i]))
-                            tmp[i]?.Invoke(sender, e);
+                            tmp[i]?.EventHandler?.Invoke(sender, e);
                     }
                     else
                     {

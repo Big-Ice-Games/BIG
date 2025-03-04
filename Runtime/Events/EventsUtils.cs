@@ -25,7 +25,7 @@ namespace BIG.Events
                     EventHandler handler = (EventHandler)Delegate.CreateDelegate(
                         typeof(EventHandler), obj, methods[i]);
 
-                    GameEventsManager.Subscribe(attribute.EventType, handler);
+                    GameEventsManager.Subscribe(attribute.EventType, attribute.Priority, handler);
                 }
                 catch (Exception e)
                 {

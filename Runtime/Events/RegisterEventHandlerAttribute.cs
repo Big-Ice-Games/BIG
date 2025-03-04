@@ -15,10 +15,12 @@ namespace BIG.Events
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class RegisterEventHandlerAttribute : Attribute
     {
+        public int Priority { get; }
         public Type EventType { get; }
 
-        public RegisterEventHandlerAttribute(Type eventType)
+        public RegisterEventHandlerAttribute(int priority, Type eventType)
         {
+            Priority = priority;
             EventType = eventType;
         }
     }
