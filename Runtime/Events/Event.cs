@@ -16,6 +16,6 @@ namespace BIG.Events
     {
         public string EventIdentifier => GetType()?.FullName ?? string.Empty;
         public bool Consumed { get; set; }
-        public void Publish<T>(Type sender = null) where T : Event => GameEventsManager.Publish(sender, this as T);
+        public void Publish<T>(Type sender = null) where T : Event => Events.Publish(sender, this as T);
     }
 }

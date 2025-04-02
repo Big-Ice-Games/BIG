@@ -26,7 +26,7 @@ namespace BIG.Events
             EventHandler = eventHandler;
         }
     }
-    public static class GameEventsManager
+    public static class Events
     {
         private static readonly Dictionary<string, IList<EventSubscriber>> EVENTS_SUBSCRIBERS = new Dictionary<string, IList<EventSubscriber>>(64);
 
@@ -125,7 +125,7 @@ namespace BIG.Events
 
             if (string.IsNullOrEmpty(key))
             {
-                throw new Exception($"GameEventManager: Cannot recognize {typeof(T)} assembly FullName.");
+                throw new Exception($"Events: Cannot recognize {typeof(T)} assembly FullName.");
             }
 
             if (EVENTS_SUBSCRIBERS.ContainsKey(key))

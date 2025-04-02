@@ -24,7 +24,7 @@ namespace BIG
         private static readonly Type ULONG_TYPE = typeof(ulong);
         private static readonly Type DOUBLE_TYPE = typeof(double);
         private static readonly Type STRING_TYPE = typeof(string);
-        private static readonly Type BOOLEAN_TYPE = typeof(string);
+        private static readonly Type BOOLEAN_TYPE = typeof(bool);
 
         private static readonly Type[] NUMERIC_TYPES = new Type[]
         {

@@ -12,6 +12,9 @@ namespace BIG.Events
 {
     public static class EventsUtils
     {
+        /// <summary>
+        /// Register all event handlers from object that has RegisterEventHandlerAttribute.
+        /// </summary>
         public static void SubscribeMyEventHandlers<T>(this T obj)
         {
             var methods = obj.GetMethodsWithAttribute<T, RegisterEventHandlerAttribute>();
@@ -25,7 +28,7 @@ namespace BIG.Events
                     EventHandler handler = (EventHandler)Delegate.CreateDelegate(
                         typeof(EventHandler), obj, methods[i]);
 
-                    GameEventsManager.Subscribe(attribute.EventType, attribute.Priority, handler);
+                    Events.Subscribe(attribute.EventType, attribute.Priority, handler);
                 }
                 catch (Exception e)
                 {
@@ -34,6 +37,9 @@ namespace BIG.Events
             }
         }
 
+        /// <summary>
+        /// Unsubscribe all event handlers from object that has RegisterEventHandlerAttribute.
+        /// </summary>
         public static void UnSubscribeMyEventHandlers<T>(this T obj)
         {
             var methods = obj.GetMethodsWithAttribute<T, RegisterEventHandlerAttribute>();
@@ -45,7 +51,7 @@ namespace BIG.Events
                 EventHandler handler = (EventHandler)Delegate.CreateDelegate(
                     typeof(EventHandler), obj, methods[i]);
 
-                GameEventsManager.Unsubscribe(attribute.EventType, handler);
+                Events.Unsubscribe(attribute.EventType, handler);
             }
         }
     }

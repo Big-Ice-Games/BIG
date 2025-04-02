@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace BIG.Utils
+namespace BIG
 {
     /// <summary>
     /// Class contains extensions from IEnumerable, IList, arrays and enums.

@@ -17,7 +17,7 @@ namespace BIG
 {
     public static class IP
     {
-        private static readonly List<string> _ipServices = new List<string>()
+        private static readonly List<string> IP_SERVICES = new List<string>()
         {
             "http://icanhazip.com",
             "https://api.ipify.org",
@@ -28,7 +28,7 @@ namespace BIG
         {
             using var httpClient = new HttpClient();
      
-            foreach (var service in _ipServices)
+            foreach (var service in IP_SERVICES)
             {
                 try
                 {

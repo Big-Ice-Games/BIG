@@ -1,4 +1,4 @@
-﻿namespace BIG.Utils
+﻿namespace BIG
 {
     public static class Args
     {
