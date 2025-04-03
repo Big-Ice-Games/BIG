@@ -1,5 +1,15 @@
 # BIG
+
 Base Library used among all Big Ice Games projects.
+
+First of all you need to install <a href="https://github.com/GlitchEnzo/NuGetForUnity" target="_blank">`NuGetForUnity`</a>.
+
+After that open it through NuGet > Manage NuGet Packages.
+Search for <a href="https://github.com/autofac/Autofac" target="_blank">`Autofac`</a> and install it.
+
+Now you are ready to install BIG.
+Go to Window > Package Manager > Click plus `+` sign button in the left upper corner and select `Install Package from git URL`.
+Use this repository git url to download it : https://github.com/Big-Ice-Games/BIG.git.
 
 ## <a href="https://github.com/Big-Ice-Games/BIG/tree/main/Runtime/DI" target="_blank">`DI`</a>
 Dependency injection is the backbone of Big Ice Games projects.
@@ -12,7 +22,7 @@ To make sure we avoid dynamic compilation that can occure with <a href="https://
 
 $${\color{red}IMPORTANT}$$ - dynamic compilation does not work on some platforms. Especially mobile platforms.
 
-You can check how <a href="https://github.com/Big-Ice-Games/SpaceSmuggler/blob/main/Runtime/SpaceSmugglerAssemblyModule.cs" target="_blank">`Space Smuggler`</a> handles registration.
+You can check how <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/DI/God.cs" target="_blank">`God`</a> handles registration of UnityLogger in `WithLogger` function or check example belowe.
 
 ```
 public override void Register(ContainerBuilder containerBuilder)
@@ -26,10 +36,46 @@ public override void Register(ContainerBuilder containerBuilder)
 }
 ```
 
-Application entry happening when you invoke <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/DI/God.cs" target="_blank">`WorldCreation`</a> in a God class.
-It require <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/ILogger.cs" target="_blank">`ILogger`</a> implementation and a set of <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/DI/AssemblyModule.cs" target="_blank">`AssemblyModules`</a> that you would like to register.
+Application entry happening when you invoke <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/DI/God.cs" target="_blank">`CreateWorld`</a> in a God class.
 
-Additionally, you can mark your class with the <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/DI/RegistrationRequiredAttribute.cs" target="_blank">`[RegistrationRequiredAttribute]`</a> to ensure that the developer receives the appropriate information about which types require registration but the application is unable to resolve them.
+You can use flexible chin creation like this:
+
+```
+using Autofac;
+using BIG;
+using UnityEngine;
+
+public sealed class Initialization : MonoBehaviour
+{
+    [SerializeField] private Settings _settings;
+    private void Awake()
+    {
+        God.Ask()
+            .WithLogger(new UnityLogger())
+            .WithAssemblyModule(new MyCustomAssemblyModule(_settings))
+            .WithStandaloneRegistration().CreateWorld();
+
+        // Here you have your settings resolved from the container
+        var usageExample = God.PrayFor<ISettings>();
+    }
+    
+    private sealed class MyCustomAssemblyModule : AssemblyModule
+    {
+        private readonly ISettings _settings;
+        internal MyCustomAssemblyModule(ISettings settings)
+        {
+            _settings = settings;
+        }
+        public override void Register(ContainerBuilder containerBuilder)
+        {
+            containerBuilder.Register(c => _settings)
+                .As<ISettings>()
+                .Keyed<object>(typeof(ISettings).FullName)
+                .SingleInstance();
+        }
+    }
+}
+```
 
 You can inject your dependencies into Unity Game Objects through <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/DI/InjectAttribute.cs" target="_blank">`[InjectAttribute]`</a> and <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/DI/RuntimeDependencyProvider.cs" target="_blank">`RuntimeDependencyProvider`</a> like this
 
@@ -44,102 +90,62 @@ public class ExampleClass : MonoBehaviour
   }
 }
 ```
-or hide it in a base class like this
+or use a base class like this:
 
 ```
-public abstract class BaseBehaviour : MonoBehaviour
+public class Entity : BaseBehaviour
 {
-   private bool _initiated = false;
-   protected void Awake()
-   {
-       if (_initiated) return;
-       _initiated = true;
-       this.ResolveMyDependencies();
-       OnAwake();
-   }
-
-   protected virtual void OnAwake()
-   {
-   }
+    /// <summary>
+    /// Will be available after Awake function.
+    /// </summary>
+    [Inject] private ISettings _settings;
 }
+```
 
-public class ExampleClass : BaseBehaviour
+<a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Unity/BaseBehaviour.cs" target="_blank">`BaseBehaviour`</a> also handle <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Events/SubscribeAttribute.cs" target="_blank">`[Subscribe]`</a>
+automatically using extension methods. You can build your own version easly or use these extensions as you like.
+
+```
+this.ResolveMyDependencies(); // handle [Inject] attributes.
+protected virtual void OnEnable() => this.Subscribe(); // Handle [Subscribe] attributes.
+protected virtual void OnDisable() => this.Unsubscribe(); // Handle [Subscribe] attributes.
+```
+
+Subscribe attribute take advantage of a simple <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Events/Events.cs" target="_blank">`Events`</a> bus implementation without dynamic allocations.
+
+Raise event example: 
+```
+public readonly struct EventDataExample
 {
-  [Inject] private MainThreadActionsQueue _mainThreadActionsQueue;
+    public EventDataExample(Transform referenceTypeExample, int valueTypeExample)
+    {
+        ReferenceTypeExample = referenceTypeExample;
+        ValueTypeExample = valueTypeExample;
+    }
+    
+    public readonly Transform ReferenceTypeExample;
+    public readonly int ValueTypeExample;
+}
+public class EventPublisher : BaseBehaviour
+{
+    private void Update()
+    {
+        Events.Raise(new EventDataExample(transform, 44));
+    }
+}
+```
+Subscriber example:
+
+```
+public class EventSubscriber : BaseBehaviour
+{
+    [Subscribe]
+    private void OnEventDataExample(EventDataExample e)
+    {
+        this.Log(e.ValueTypeExample.ToString());
+    }
 }
 ```
 
 ## <a href="https://github.com/Big-Ice-Games/BIG/tree/main/Runtime/Utils" target="_blank">`Utils`</a>
 Avoiding code duplication, we keep extensions with broad applications here and use them in other projects. Useful things that are independent of a specific application are found here.
-
-## <a href="https://github.com/Big-Ice-Games/BIG/tree/main/Runtime/Types" target="_blank">`Types`</a>
-To maintain consistency of base types across applications, we build a repository of useful classes such as vectors, colors, etc.
-
-## DLL 
-files ready to use in Unity projects are available at the following URLs:
-
-https://github.com/Big-Ice-Games/BIG/raw/refs/heads/main/bin/Release/netstandard2.1/Autofac.dll</br>
-https://github.com/Big-Ice-Games/BIG/raw/refs/heads/main/bin/Release/netstandard2.1/BIG.dll
-
-bin/debug and bin/release are not a part of the .gitignore because of that.
-The latest version of BIG should be available ready to use without having to download the entire repository and build it yourself.
-
-The process of using and updating can be automated in a project with a class like this:
-
-```
-
-using UnityEngine;
-using UnityEditor;
-using System.IO;
-using UnityEngine.Networking;
-
-namespace Editor
-{
-    public class BigIceGamesRepositoryProvider : EditorWindow
-    {
-        private const string AutofacUrl = "https://github.com/Big-Ice-Games/BIG/raw/refs/heads/main/bin/Release/netstandard2.1/Autofac.dll";
-        private const string BigUrl = "https://github.com/Big-Ice-Games/BIG/raw/refs/heads/main/bin/Release/netstandard2.1/BIG.dll";
-        private const string AutofacDestinationPath = "Assets/Plugins/BigIceGames/Autofac.dll";
-        private const string BigDestinationPath = "Assets/Plugins/BigIceGames/BIG.dll";
-
-        [MenuItem("BIG/Update BIG dlls")]
-        public static void UpdateBigDlls()
-        {
-            DownloadFile(AutofacUrl, AutofacDestinationPath);
-            DownloadFile(BigUrl, BigDestinationPath);
-        }
-
-        public static void DownloadFile(string fileUrl, string destinationPath)
-        {
-            var directory = Path.GetDirectoryName(destinationPath);
-            var file = Path.GetFileName(destinationPath);
-
-            EditorUtility.DisplayProgressBar("Downloading File", $"Fetching {file}...", 0.5f);
-
-            var webRequest = UnityWebRequest.Get(fileUrl);
-            var operation = webRequest.SendWebRequest();
-
-            operation.completed += _ =>
-            {
-                if (webRequest.result != UnityWebRequest.Result.Success)
-                {
-                    Debug.LogError($"Error downloading file: {webRequest.error}");
-                }
-                else
-                {
-                    if (!Directory.Exists(directory))
-                    {
-                        Directory.CreateDirectory(directory);
-                    }
-
-                    File.WriteAllBytes(destinationPath, webRequest.downloadHandler.data);
-                    Debug.Log($"File downloaded successfully to: {destinationPath}");
-                }
-
-                EditorUtility.ClearProgressBar();
-            };
-        }
-    }
-}
-
-```
