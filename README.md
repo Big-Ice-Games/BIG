@@ -2,12 +2,8 @@
 
 Base Library used among all Big Ice Games projects.
 
-First of all you need to install <a href="https://github.com/GlitchEnzo/NuGetForUnity" target="_blank">`NuGetForUnity`</a>.
+## Installation
 
-After that open it through NuGet > Manage NuGet Packages.
-Search for <a href="https://github.com/autofac/Autofac" target="_blank">`Autofac`</a> and install it.
-
-Now you are ready to install BIG.
 Go to Window > Package Manager > Click plus `+` sign button in the left upper corner and select `Install Package from git URL`.
 Use this repository git url to download it : https://github.com/Big-Ice-Games/BIG.git.
 
