@@ -34,13 +34,14 @@ namespace BIG
             _builder = new ContainerBuilder();
         }
 
-        public static God WithStandaloneRegistration()
+        public static God Ask() => Instance;
+        public God WithStandaloneRegistration()
         {
             Instance.StandaloneRegistration();
             return _instance;
         }
         
-        public static God WithLogger(ILogger logger)
+        public God WithLogger(ILogger logger)
         {
             Instance._builder.Register(c => logger)
                 .As<ILogger>()
@@ -51,14 +52,14 @@ namespace BIG
             return _instance;
         }
 
-        public static God WithAssemblyModule(AssemblyModule assemblyModule)
+        public God WithAssemblyModule(AssemblyModule assemblyModule)
         { 
             assemblyModule.Register(Instance._builder);
             Instance._modules++;
             return _instance;
         }
         
-        public static God WithAssemblyModules(IList<AssemblyModule> assemblyModules)
+        public God WithAssemblyModules(IList<AssemblyModule> assemblyModules)
         { 
             assemblyModules.Each(s =>
             {
@@ -80,7 +81,7 @@ namespace BIG
             try
             {
                 // If there is no logger included then this will throw an exception.
-                ILogger logger = Instance.PrayFor<ILogger>(); 
+                ILogger logger = PrayFor<ILogger>(); 
                 Instance.Log($"World created:" +
                              (Instance._logger ? 
                                  "<color=green>Logger Assigned</color>" : 
@@ -103,7 +104,25 @@ namespace BIG
         /// </summary>
         /// <typeparam name="T">Type of registered object.</typeparam>
         /// <returns>Instance.</returns>
-        public T PrayFor<T>()
+        public static T PrayFor<T>()
+        {
+            try
+            {
+                return Instance._container.Resolve<T>();
+            }
+            catch (Exception e)
+            {
+                var msg = $"[GOD] cannot resolve type: {typeof(T).FullName}\n{e.Message}\n{e.StackTrace}";
+                throw new Exception(msg);
+            }
+        }
+        
+        /// <summary>
+        /// Generic types' resolver for non-static usage.
+        /// </summary>
+        /// <typeparam name="T">Type of registered object.</typeparam>
+        /// <returns>Instance.</returns>
+        public T Ask<T>()
         {
             try
             {
@@ -141,7 +160,7 @@ namespace BIG
         /// </summary>
         public static void Dispose()
         {
-            Instance.PrayFor<IList<IDisposable>>().Each(c => c?.Dispose());
+            PrayFor<IList<IDisposable>>().Each(c => c?.Dispose());
         }
         
         /// <summary>

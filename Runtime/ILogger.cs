@@ -39,7 +39,7 @@ namespace BIG
     public static class Logger
     {
         private static ILogger _instance;
-        private static ILogger LOGGER = _instance ??= God.WithLogger(new UnityLogger()).CreateWorld().PrayFor<ILogger>();
+        private static ILogger LOGGER = _instance ??= God.Ask().WithLogger(new UnityLogger()).CreateWorld().Ask<ILogger>();
         
         internal static void InitLogger(ILogger logger)
         {
