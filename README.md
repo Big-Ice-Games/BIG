@@ -38,7 +38,11 @@ public override void Register(ContainerBuilder containerBuilder)
 
 Application entry happening when you invoke <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/DI/God.cs" target="_blank">`CreateWorld`</a> in a God class.
 
+<<<<<<< HEAD
 You can use flexible chain creation like this:
+=======
+You can use flexible chin creation like this:
+>>>>>>> 77aa29f5d759746d9dd4b6611d1edf763d589c3b
 
 ```
 using Autofac;
@@ -148,4 +152,8 @@ public class EventSubscriber : BaseBehaviour
 ```
 
 ## <a href="https://github.com/Big-Ice-Games/BIG/tree/main/Runtime/Utils" target="_blank">`Utils`</a>
+<<<<<<< HEAD
 Avoiding code duplication, we keep extensions with broad applications here and use them in other projects. Useful things that are independent of a specific application are found here.
+=======
+Avoiding code duplication, we keep extensions with broad applications here and use them in other projects. Useful things that are independent of a specific application are found here.
+>>>>>>> 77aa29f5d759746d9dd4b6611d1edf763d589c3b
