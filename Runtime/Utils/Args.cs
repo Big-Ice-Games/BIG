@@ -1,6 +1,6 @@
 ﻿namespace BIG
 {
-    public static class Args
+    public class Args
     {
         /// <summary>
         /// If <see cref="System.Environment.GetCommandLineArgs()"/> contains +connect_lobby argument this function will give you lobby id.

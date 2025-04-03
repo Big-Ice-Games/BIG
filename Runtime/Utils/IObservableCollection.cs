@@ -6,7 +6,7 @@ namespace BIG
 {
     public interface IObservableCollection<T>
     {
-        event Action<IList<T>>? OnChanged;
+        event Action<IList<T>> OnChanged;
         void Add(T item);
         void Insert(int index, T item);
         void Clear();
@@ -18,83 +18,68 @@ namespace BIG
         void RemoveAt(int index);
         public static IObservableCollection<T> Create(IList<T> elements) => new ObservableCollection<T>(elements);
         public static IObservableCollection<T> Create(int capacity) => new ObservableCollection<T>(capacity);
-    }
-
-    [Serializable]
-    internal class ObservableCollection<T> : IList<T>, IObservableCollection<T>
-    {
-        private readonly IList<T> _list;
-        public event Action<IList<T>>? OnChanged;
-
-        internal ObservableCollection(IList<T>? initialList)
+        
+        [Serializable]
+        private class ObservableCollection<G> : IList<G>, IObservableCollection<G>
         {
-            _list = initialList ?? new List<T>();
-        }
-
-        internal ObservableCollection(int capacity)
-        {
-            _list = new List<T>(capacity);
-        }
-
-        public T this[int index]
-        {
-            get => _list[index];
-            set
+            private readonly IList<G> _list;
+            public event Action<IList<G>> OnChanged = delegate { };
+            internal ObservableCollection(IList<G> initialList) => _list = initialList ?? new List<G>();
+            internal ObservableCollection(int capacity) => _list = new List<G>(capacity);
+    
+            public G this[int index]
             {
-                _list[index] = value;
-                Invoke();
+                get => _list[index];
+                set
+                {
+                    _list[index] = value;
+                    OnChanged?.Invoke(_list);
+                }
             }
-        }
-
-        public void Invoke() => OnChanged?.Invoke(_list);
-
-        public int Count => _list.Count;
-
-        public bool IsReadOnly => _list.IsReadOnly;
-
-        public void Add(T item)
-        {
-            _list.Add(item);
-            Invoke();
-        }
-
-        public void Clear()
-        {
-            _list.Clear();
-            Invoke();
-        }
-
-        public bool Contains(T item) => _list.Contains(item);
-
-        public void CopyTo(T[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
-
-        public bool Remove(T item)
-        {
-            var result = _list.Remove(item);
-            if (result)
+            
+            public int Count => _list.Count;
+            public bool IsReadOnly => _list.IsReadOnly;
+    
+            public void Add(G item)
             {
-                Invoke();
+                _list.Add(item);
+                OnChanged?.Invoke(_list);
             }
-
-            return result;
-        }
-
-        public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => _list.GetEnumerator();
-
-        public int IndexOf(T item) => _list.IndexOf(item);
-
-        public void Insert(int index, T item)
-        {
-            _list.Insert(index, item);
-            Invoke();
-        }
-
-        public void RemoveAt(int index)
-        {
-            T item = _list[index];
-            _list.RemoveAt(index);
-            Invoke();
+    
+            public void Clear()
+            {
+                _list.Clear();
+                OnChanged?.Invoke(_list);
+            }
+    
+            public bool Contains(G item) => _list.Contains(item);
+    
+            public void CopyTo(G[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
+    
+            public bool Remove(G item)
+            {
+                var result = _list.Remove(item);
+                if (result) OnChanged?.Invoke(_list);
+                return result;
+            }
+    
+            public IEnumerator<G> GetEnumerator() => _list.GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() => _list.GetEnumerator();
+    
+            public int IndexOf(G item) => _list.IndexOf(item);
+    
+            public void Insert(int index, G item)
+            {
+                _list.Insert(index, item);
+                OnChanged?.Invoke(_list);
+            }
+    
+            public void RemoveAt(int index)
+            {
+                G item = _list[index];
+                _list.RemoveAt(index);
+                OnChanged?.Invoke(_list);
+            }
         }
     }
 }

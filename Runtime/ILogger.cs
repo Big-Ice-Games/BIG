@@ -24,7 +24,12 @@ namespace BIG
     /// </summary>
     public interface ILogger
     {
-        void Log(object sender, string message, LogLevel logLevel = LogLevel.Debug, bool withStackTrace = false);
+        void Log(
+            object sender,
+            string message,
+            LogLevel logLevel = LogLevel.Debug,
+            bool withStackTrace = false,
+            bool withTime = false);
     }
 
     /// <summary>
@@ -33,16 +38,22 @@ namespace BIG
     /// </summary>
     public static class Logger
     {
-        private static ILogger LOGGER = null!;
-
+        private static ILogger _instance;
+        private static ILogger LOGGER = _instance ??= God.WithLogger(new UnityLogger()).CreateWorld().PrayFor<ILogger>();
+        
         internal static void InitLogger(ILogger logger)
         {
-            LOGGER = logger;
+            _instance = logger;
         }
 
-        public static void Log(this object sender, string message, LogLevel logLevel = LogLevel.Debug, bool withStackTrace = false)
+        public static void Log(
+            this object sender,
+            string message,
+            LogLevel logLevel = LogLevel.Debug,
+            bool withStackTrace = false,
+            bool withTime = false)
         {
-            LOGGER?.Log(sender, message, logLevel, withStackTrace);
+            LOGGER?.Log(sender, message, logLevel, withStackTrace, withTime);
         }
     }
 }

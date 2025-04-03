@@ -8,24 +8,23 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
+using Action = Unity.Plastic.Newtonsoft.Json.Serialization.Action;
 
-namespace BIG.Events
+namespace BIG
 {
-    internal class EventSubscriber
+    internal readonly struct EventSubscriber
     {
-        /// <summary>
-        /// Lower priority are handled first.
-        /// </summary>
-        public int Priority;
-
-        public EventHandler EventHandler;
-
-        public EventSubscriber(int priority, EventHandler eventHandler)
+        public EventSubscriber(int priority, Action<object> handler)
         {
             Priority = priority;
-            EventHandler = eventHandler;
+            Handler = handler;
         }
+        public int Priority { get; }
+        public Action<object> Handler { get; }
+        public void Invoke(object @event) => Handler?.Invoke(@event);
     }
+    
     public static class Events
     {
         private static readonly Dictionary<string, IList<EventSubscriber>> EVENTS_SUBSCRIBERS = new Dictionary<string, IList<EventSubscriber>>(64);
@@ -44,38 +43,65 @@ namespace BIG.Events
         /// <typeparam name="T">Type of event you want to subscribe for.</typeparam>
         /// <param name="priority">Priority for subscription. Lower priority are handled first.</param>
         /// <param name="handler">Event handler that receive this event.</param>
-        public static void Subscribe<T>(int priority, EventHandler handler) where T : Event
+        public static void Subscribe<T>(int priority, Action<Event<T>> handler) where T : struct
         {
             string key = typeof(T).FullName;
-            InternalSubscription(key, new EventSubscriber(priority, handler));
+            var wrappedHandler = new Action<object>((e) => 
+            {
+                if (e is Event<T> typedEvent)
+                {
+                    handler(typedEvent);
+                }
+            });
+
+            InternalSubscription(key, new EventSubscriber(priority, wrappedHandler));
         }
 
         /// <summary>
         /// Non-generic subscription used by DI module.
         /// </summary>
-        /// <param name="T">Event type.</param>
-        /// /// <param name="priority">Priority for subscription. Lower priority are handled first.</param>
-        /// <param name="handler">Handle for this event.</param>
-        public static void Subscribe(Type T, int priority, EventHandler handler)
+        /// ///
+        /// <param name="eventDataTypeFullName">Pass typeof(T).FullName from Event(T) used in handler.
+        /// It is done automatically in <see cref="SubscribeAttribute"/></param>
+        /// <param name="priority">Priority for subscription. Lower priority are handled first.</param>
+        /// <param name="handler">Handle for this event. Under the hood is Action(Event(T))</param>
+        public static void Subscribe(string eventDataTypeFullName, int priority, Action<object> handler)
         {
-            string key = T.FullName;
+            string key = eventDataTypeFullName;
             InternalSubscription(key, new EventSubscriber(priority, handler));
         }
 
+        /// <summary>
+        /// Subscribes a handler to the event subscribers list for a given event type.
+        /// </summary>
+        /// <param name="key">The full name of the event type.</param>
+        /// <param name="handler">The event subscriber to be added.</param>
         private static void InternalSubscription(string key, EventSubscriber handler)
         {
-            if (!EVENTS_SUBSCRIBERS.ContainsKey(key))
+            Debug.Log($"Event {key} subscrubed with priority {handler.Priority}");
+            if (EVENTS_SUBSCRIBERS.TryGetValue(key, out var subscribers) == false)
             {
-                EVENTS_SUBSCRIBERS.Add(key, new List<EventSubscriber>());
+                subscribers = new List<EventSubscriber>(4); // If there are no subscribers for this event type, create a new list.
+                EVENTS_SUBSCRIBERS[key] = subscribers;
             }
 
-            if (EVENTS_SUBSCRIBERS[key].All(s => s.EventHandler != handler.EventHandler))
+            for (int i = 0; i < subscribers.Count; i++)
             {
-                EVENTS_SUBSCRIBERS[key].Add(handler);
-
-                // Sort list of subscribers by priority. 
-                EVENTS_SUBSCRIBERS[key] = EVENTS_SUBSCRIBERS[key].OrderBy(s => s.Priority).ToList();
+                if (subscribers[i].Handler == handler.Handler) return; // Already subscribe
             }
+
+            // Sort by priority
+            int insertAt = subscribers.Count;
+            for (int i = 0; i < subscribers.Count; i++)
+            {
+                if (handler.Priority < subscribers[i].Priority)
+                {
+                    insertAt = i;
+                    break;
+                }
+            }
+
+            subscribers.Insert(insertAt, handler);
         }
 
         /// <summary>
@@ -83,7 +109,7 @@ namespace BIG.Events
         /// </summary>
         /// <typeparam name="T">Type of event that you are no longer interested in.</typeparam>
         /// <param name="handler">Event handler that subscribed this type of event.</param>
-        public static void Unsubscribe<T>(EventHandler handler) where T : Event
+        public static void Unsubscribe<T>(Action<object> handler)
         {
             InternalUnsubscribe(typeof(T).FullName, handler);
         }
@@ -91,63 +117,63 @@ namespace BIG.Events
         /// <summary>
         /// Non-generic unsubscription for given handler on given type used by DI module.
         /// </summary>
-        /// <param name="T">Type of event.</param>
+        /// <param name="eventDataTypeFullName">Pass typeof(T).FullName from Event(T) used in handler.
+        /// It is done automatically in <see cref="SubscribeAttribute"/></param>
         /// <param name="handler">Handle for this event.</param>
-        public static void Unsubscribe(Type T, EventHandler handler)
+        public static void Unsubscribe(string eventDataTypeFullName, Action<object> handler)
         {
-            InternalUnsubscribe(T.FullName, handler);
+            InternalUnsubscribe(eventDataTypeFullName, handler);
         }
 
-        private static void InternalUnsubscribe(string key, EventHandler handler)
+        private static void InternalUnsubscribe(string key, Action<object> handler)
         {
-            if (EVENTS_SUBSCRIBERS.TryGetValue(key, out var value))
+            if (EVENTS_SUBSCRIBERS.TryGetValue(key, out var list))
             {
-                for (int i = 0; i < value.Count; i++)
+                for (int i = 0; i < list.Count; i++)
                 {
-                    if (value[i].EventHandler == handler)
+                    if (list[i].Handler == handler)
                     {
-                        value.RemoveAt(i);
+                        list.RemoveAt(i);
+                        Debug.Log($"Event {key} unsubscribed.");
+                        if (list.Count == 0)
+                            EVENTS_SUBSCRIBERS.Remove(key);
                         return;
                     }
                 }
             }
         }
-
+        
         /// <summary>
         /// Event publication function.
         /// </summary>
         /// <typeparam name="T">Type of event that we are publishing.</typeparam>
-        /// <param name="sender">Event sender.</param>
         /// <param name="e">Event as self.</param>
-        public static void Publish<T>(object sender, T e) where T : Event?
+        public static void Publish<T>(Event<T> e) where T : struct
         {
             string key = typeof(T).FullName;
 
-            if (string.IsNullOrEmpty(key))
+            if (!EVENTS_SUBSCRIBERS.TryGetValue(key, out var subs))
+                return;
+            
+            for (int i = 0; i < subs.Count;)
             {
-                throw new Exception($"Events: Cannot recognize {typeof(T)} assembly FullName.");
+                var subscriber = subs[i];
+                i++; // Increment index before potential change in the list of subscribers
+                
+                subscriber.Invoke(e.Data);
             }
-
-            if (EVENTS_SUBSCRIBERS.ContainsKey(key))
-            {
-                // Get copy of the list of subscribers
-                var tmp = EVENTS_SUBSCRIBERS[key].ToList();
-
-                for (int i = 0; i < tmp.Count; i++)
-                {
-                    // If no one already consumed this event
-                    if (!e.Consumed)
-                    {
-                        // If subscriber wasn't removed from the subscribers in meantime
-                        if (EVENTS_SUBSCRIBERS[key].Contains(tmp[i]))
-                            tmp[i]?.EventHandler?.Invoke(sender, e);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
+        }
+        
+        public static void Raise<T>(this T eventData) where T : struct
+        {
+            var e = new Event<T>(eventData);
+            Publish(e);
+        }
+        
+        public static void Raise<T>(this ref T eventData) where T : struct
+        {
+            var e = new Event<T>(eventData);
+            Publish(e);
         }
     }
 }

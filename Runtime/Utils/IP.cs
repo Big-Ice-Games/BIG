@@ -15,10 +15,9 @@ using System.Threading.Tasks;
 
 namespace BIG
 {
-    public static class IP
+    public class IP
     {
-        private static readonly List<string> IP_SERVICES = new List<string>()
-        {
+        private static readonly string[] IP_SERVICES = {
             "http://icanhazip.com",
             "https://api.ipify.org",
             "https://ipinfo.io/ip"

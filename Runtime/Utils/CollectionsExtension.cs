@@ -62,7 +62,7 @@ namespace BIG
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Clear<T>(this T?[]? collection) where T : class
+        public static void Clear<T>(this T[] collection) where T : class
         {
             if (collection == null) return;
             for (int i = 0; i < collection.Length; i++)
@@ -647,9 +647,9 @@ namespace BIG
         /// </summary>
         public static class Random
         {
-            private static readonly double _pi2 = Math.PI * 2;
+            private const double PI2 = Math.PI * 2;
             private static System.Random _random = new System.Random();
-            private static readonly System.Random _persistentRandom = new System.Random();
+            private static readonly System.Random PERSISTENT_RANDOM = new System.Random();
             private static MersenneGenerator _mersenneGenerator;
 
             public static void InitializeSeedRandom(uint seed)
@@ -672,9 +672,9 @@ namespace BIG
                 return _mersenneGenerator.GetFloat(min, max);
             }
 
-            public static int MemoryFriendlyRandom(int value1, int value2) => _persistentRandom.Next(value1, value2);
+            public static int MemoryFriendlyRandom(int value1, int value2) => PERSISTENT_RANDOM.Next(value1, value2);
 
-            public static byte MemoryFriendlyRandomByte() => (byte)_persistentRandom.Next(0, 256);
+            public static byte MemoryFriendlyRandomByte() => (byte)PERSISTENT_RANDOM.Next(0, 256);
 
             public static int Range(int value1, int value2)
             {
@@ -690,11 +690,11 @@ namespace BIG
 
             public static int Next(int maxValue) => _random.Next(maxValue);
             public static double NextDouble() => _random.NextDouble();
-            public static double RandomAngle() => _random.NextDouble() * _pi2;
+            public static double RandomAngle() => _random.NextDouble() * PI2;
 
             public static void RandomPositionInRadius(float x, float y, float radius, out float x2, out float y2)
             {
-                var angle = _random.NextDouble() * _pi2;
+                var angle = _random.NextDouble() * PI2;
                 var distance = Math.Sqrt(_random.NextDouble()) * radius;
                 x2 = (float)(x + distance * Math.Cos(angle));
                 y2 = (float)(y + distance * Math.Sin(angle));
@@ -702,7 +702,7 @@ namespace BIG
 
             public static void RandomOffsetInRadius(float radius, out float x2, out float y2)
             {
-                var angle = _random.NextDouble() * _pi2;
+                var angle = _random.NextDouble() * PI2;
                 var distance = Math.Sqrt(_random.NextDouble()) * radius;
                 x2 = (float)(distance * Math.Cos(angle));
                 y2 = (float)(distance * Math.Sin(angle));

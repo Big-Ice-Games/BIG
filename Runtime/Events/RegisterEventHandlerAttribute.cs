@@ -7,21 +7,20 @@
 
 using System;
 
-namespace BIG.Events
+namespace BIG
 {
     /// <summary>
     /// Use this attribute to request event handler registration.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-    public sealed class RegisterEventHandlerAttribute : Attribute
+    public sealed class SubscribeAttribute : Attribute
     {
+        private const int DEFAULT_PRIORITY = 0;
         public int Priority { get; }
-        public Type EventType { get; }
 
-        public RegisterEventHandlerAttribute(int priority, Type eventType)
+        public SubscribeAttribute(int priority = DEFAULT_PRIORITY)
         {
             Priority = priority;
-            EventType = eventType;
         }
     }
 }

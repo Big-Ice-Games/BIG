@@ -9,32 +9,42 @@ using System;
 
 namespace BIG
 {
+    public interface IPoolObjectProvider<T> where T : class, new()
+    {
+        T Create();
+    }
+    
     public class Pool<T> where T : class, new()
     {
         private class PoolNode
         {
-            public T? Item;
-            public PoolNode? Next;
+            public T Item;
+            public PoolNode Next;
         }
 
-        private PoolNode? _head; // Head of the linked list (points to the next free element)
+        private PoolNode _head; // Head of the linked list (points to the next free element)
         private readonly object _lock = new object(); // For thread safety
-
-        public Pool(int initialCapacity)
+        private readonly IPoolObjectProvider<T> _provider;
+        
+        public Pool(int initialCapacity, IPoolObjectProvider<T> provider = null)
         {
+            _provider = provider;
             for (int i = 0; i < initialCapacity; i++)
             {
-                var node = new PoolNode { Item = new T() };
+                var node = new PoolNode { Item = Create() };
                 Put(node);
             }
         }
 
-        public T? Get()
+        private T Create() => _provider != null ? _provider.Create() : new T();
+
+        public T Get()
         {
             lock (_lock)
             {
                 if (_head == null)
                 {
+                    if (_provider != null) return _provider.Create();
                     return new T();
                 }
 

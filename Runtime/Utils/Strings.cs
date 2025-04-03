@@ -5,7 +5,7 @@ namespace BIG
 {
     public static class Strings
     {
-        public static string DictionaryToJsonString(this Dictionary<string, object>? dict)
+        public static string DictionaryToJsonString(this Dictionary<string, object> dict)
         {
             if (dict == null || dict.Count == 0)
                 return string.Empty;

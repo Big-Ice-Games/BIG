@@ -6,53 +6,58 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 
-namespace BIG.Events
+namespace BIG
 {
     public static class EventsUtils
     {
-        /// <summary>
-        /// Register all event handlers from object that has RegisterEventHandlerAttribute.
-        /// </summary>
-        public static void SubscribeMyEventHandlers<T>(this T obj)
+        private static readonly Dictionary<object, List<(string key, Action<object> handler)>> _subscriptions = new();
+
+        public static void Subscribe<T>(this T obj)
         {
-            var methods = obj.GetMethodsWithAttribute<T, RegisterEventHandlerAttribute>();
+            var methods = obj.GetMethodsWithAttribute<T, SubscribeAttribute>();
 
-            for (int i = 0; i < methods.Length; i++)
+            if (!_subscriptions.TryGetValue(obj, out var cache))
             {
-                try
-                {
-                    var attribute = methods[i].GetCustomAttribute<RegisterEventHandlerAttribute>();
+                cache = new List<(string key, Action<object> handler)>(methods.Length);
+                _subscriptions[obj] = cache;
+            }
 
-                    EventHandler handler = (EventHandler)Delegate.CreateDelegate(
-                        typeof(EventHandler), obj, methods[i]);
+            foreach (var method in methods)
+            {
+                var attr = method.GetCustomAttribute<SubscribeAttribute>();
+                var param = method.GetParameters();
+                if (param.Length != 1)
+                    throw new InvalidOperationException($"Method {method.Name} must have exactly one parameter.");
 
-                    Events.Subscribe(attribute.EventType, attribute.Priority, handler);
-                }
-                catch (Exception e)
+                var eventParamType = param[0].ParameterType;
+                var key = eventParamType.FullName;
+                
+                Action<object> handler = (evt) =>
                 {
-                    throw new Exception($"Cannot subscribe event handler for object {typeof(T).FullName} for method {methods[i].Name}. \n {e}");
-                }
+                    if (evt == null || !eventParamType.IsInstanceOfType(evt)) return;
+                    method.Invoke(obj, new object[] { evt });
+                };
+
+                Events.Subscribe(key, attr.Priority, handler);
+                cache.Add((key, handler));
             }
         }
 
-        /// <summary>
-        /// Unsubscribe all event handlers from object that has RegisterEventHandlerAttribute.
-        /// </summary>
-        public static void UnSubscribeMyEventHandlers<T>(this T obj)
+        public static void Unsubscribe<T>(this T obj)
         {
-            var methods = obj.GetMethodsWithAttribute<T, RegisterEventHandlerAttribute>();
+            if (!_subscriptions.TryGetValue(obj, out var cache))
+                return;
 
-            for (int i = 0; i < methods.Length; i++)
+            foreach (var (key, handler) in cache)
             {
-                var attribute = methods[i].GetCustomAttribute<RegisterEventHandlerAttribute>();
-
-                EventHandler handler = (EventHandler)Delegate.CreateDelegate(
-                    typeof(EventHandler), obj, methods[i]);
-
-                Events.Unsubscribe(attribute.EventType, handler);
+                Events.Unsubscribe(key, handler);
             }
+
+            _subscriptions.Remove(obj);
         }
     }
+
 }

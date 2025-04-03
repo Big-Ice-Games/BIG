@@ -5,8 +5,10 @@
   "description": "A .NET Standard 2.1 library for Unity projects provided by Big Ice Games [BIG].",
   "unity": "6000.0",
   "author": {
-    "name": "Big Ice Games",
+    "name": "Filip Zieliński",
     "email": "office@bigicegames.com",
-    "url": "https://bigicegames.com"
-  }
+    "url": "https://github.com/Big-Ice-Games/BIG"
+  },
+  
+  "documentationUrl": "https://github.com/Big-Ice-Games/BIG/blob/main/README.md"
 }
