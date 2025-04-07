@@ -39,7 +39,7 @@ namespace BIG
     public static class Logger
     {
         private static ILogger _instance;
-        private static ILogger LOGGER = _instance ??= God.Ask().WithLogger(new UnityLogger()).CreateWorld().Ask<ILogger>();
+        //private static ILogger LOGGER = _instance ??= God.Ask().WithLogger(new UnityLogger()).CreateWorld().Ask<ILogger>();
         
         internal static void InitLogger(ILogger logger)
         {
@@ -53,7 +53,7 @@ namespace BIG
             bool withStackTrace = false,
             bool withTime = false)
         {
-            LOGGER?.Log(sender, message, logLevel, withStackTrace, withTime);
+            _instance?.Log(sender, message, logLevel, withStackTrace, withTime);
         }
     }
 }

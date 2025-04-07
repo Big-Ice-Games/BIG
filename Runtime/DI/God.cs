@@ -10,8 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Autofac;
-using JetBrains.Annotations;
-using log4net;
 
 namespace BIG
 {
@@ -52,16 +50,16 @@ namespace BIG
             return _instance;
         }
 
-        public God WithAssemblyModule(AssemblyModule assemblyModule)
+        public God WithAssemblyModule(IAssemblyModule assemblyModule)
         { 
             assemblyModule.Register(Instance._builder);
             Instance._modules++;
             return _instance;
         }
         
-        public God WithAssemblyModules(IList<AssemblyModule> assemblyModules)
+        public God WithAssemblyModules(IList<IAssemblyModule> assemblyModules)
         { 
-            assemblyModules.Each(s =>
+            assemblyModules.OrderBy(s => s.Priority).Each(s =>
             {
                 Instance._modules++;
                 s.Register(Instance._builder);
@@ -82,11 +80,11 @@ namespace BIG
             {
                 // If there is no logger included then this will throw an exception.
                 ILogger logger = PrayFor<ILogger>(); 
-                Instance.Log($"World created:" +
+                Instance.Log($"World created:\n" +
                              (Instance._logger ? 
-                                 "<color=green>Logger Assigned</color>" : 
-                                 "<color=red>Logger Unassigned</color>") +
-                             $"Modules registered: {Instance._modules}" +
+                                 "<color=green>Logger Assigned</color>\n" : 
+                                 "<color=red>Logger Unassigned</color>\n") +
+                             $"Modules registered: {Instance._modules}\n" +
                              $"Types registered automatically: {Instance._automaticRegistration}");
             }
             catch 

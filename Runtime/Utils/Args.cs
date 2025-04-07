@@ -1,4 +1,11 @@
-﻿namespace BIG
+﻿#region license
+
+// Copyright (c) 2025, Big Ice Games
+// All rights reserved.
+
+#endregion
+
+namespace BIG
 {
     public class Args
     {
@@ -20,7 +27,7 @@
                     return true;
                 }
             }
-
+            
             return false;
         }
     }
