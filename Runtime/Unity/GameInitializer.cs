@@ -25,7 +25,10 @@ namespace BIG
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void InitDependencies()
         {
+            #if UNITY_EDITOR
             AssertProjectStructure();
+            #endif
+            
             Application.quitting += OnQuit;
             
             var modules = LoadAllAssemblyModules();
