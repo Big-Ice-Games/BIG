@@ -16,7 +16,6 @@ namespace BIG
     /// <summary>
     /// Store actions and coroutines that can be executed in main game loop.
     /// </summary>
-    [Register(true)]
     public sealed class MainThreadActionsQueue : IDisposable
     {
         private readonly Queue<Action> _threadedActions = new Queue<Action>(48);

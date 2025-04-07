@@ -1,32 +1,44 @@
+#region license
+
+// Copyright (c) 2025, Big Ice Games
+// All rights reserved.
+
+#endregion
+
 using System;
 using System.Collections;
-using BIG;
-using UnityEngine;
 
-public class MainThreadActionExecutor : BaseBehaviour
+namespace BIG
 {
-    [Inject] private MainThreadActionsQueue _mainThreadActionsQueue;
-
-    private Action _action;
-    private IEnumerator _iEnumerator;
-
-    private void Update()
+    /// <summary>
+    /// This executor is created automatically by <see cref="GameInitializer"/>.
+    /// It handles all actions and coroutines that are queued in <see cref="MainThreadActionsQueue"/>.
+    /// </summary>
+    public class MainThreadActionExecutor : BaseBehaviour
     {
-        try
+        [Inject] private MainThreadActionsQueue _mainThreadActionsQueue;
+
+        private Action _action;
+        private IEnumerator _iEnumerator;
+
+        private void Update()
         {
-            while (_mainThreadActionsQueue.Dequeue(out _action))
+            try
             {
-                _action?.Invoke();
-            }
+                while (_mainThreadActionsQueue.Dequeue(out _action))
+                {
+                    _action?.Invoke();
+                }
             
-            while (_mainThreadActionsQueue.Dequeue(out _iEnumerator))
-            {
-                StartCoroutine(_iEnumerator);
+                while (_mainThreadActionsQueue.Dequeue(out _iEnumerator))
+                {
+                    StartCoroutine(_iEnumerator);
+                }
             }
-        }
-        catch (Exception e)
-        {
-            Log($"Update exception: {e}", LogLevel.Error);
+            catch (Exception e)
+            {
+                Log($"Update exception: {e}", LogLevel.Error);
+            }
         }
     }
 }

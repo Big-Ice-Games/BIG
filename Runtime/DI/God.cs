@@ -159,6 +159,8 @@ namespace BIG
         public static void Dispose()
         {
             PrayFor<IList<IDisposable>>().Each(c => c?.Dispose());
+            Instance._container.Dispose();
+            _instance = null;
         }
         
         /// <summary>
@@ -188,38 +190,50 @@ namespace BIG
                     {
                         if (t.GetInterfaces().Contains(typeof(IDisposable)))
                         {
-                            _builder.RegisterType(t)
+                            var build = _builder.RegisterType(t)
                                 .AsSelf()
                                 .AsImplementedInterfaces()
-                                .As<IDisposable>()
+                                //.As<IDisposable>()
                                 .Keyed<object>(t.FullName!)
                                 .SingleInstance();
+                            
+                            // Use every interface as a key too.
+                            t.GetInterfaces().Each(s => build = build.Keyed<object>(s.FullName!));
                         }
                         else
                         {
-                            _builder.RegisterType(t)
+                            var build = _builder.RegisterType(t)
                                 .AsSelf()
                                 .AsImplementedInterfaces()
                                 .Keyed<object>(t.FullName!)
                                 .SingleInstance();
+                            
+                            // Use every interface as a key too.
+                            t.GetInterfaces().Each(s => build = build.Keyed<object>(s.FullName!));
                         }
                     }
                     else
                     {
                         if (t.GetInterfaces().Contains(typeof(IDisposable)))
                         {
-                            _builder.RegisterType(t)
+                            var build = _builder.RegisterType(t)
                                 .AsSelf()
                                 .AsImplementedInterfaces()
-                                .As<IDisposable>()
+                                //.As<IDisposable>()
                                 .Keyed<object>(t.FullName!);
+                            
+                            // Use every interface as a key too.
+                            t.GetInterfaces().Each(s => build = build.Keyed<object>(s.FullName!));
                         }
                         else
                         {
-                            _builder.RegisterType(t)
+                            var build = _builder.RegisterType(t)
                                 .AsSelf()
                                 .AsImplementedInterfaces()
                                 .Keyed<object>(t.FullName!);
+                            
+                            // Use every interface as a key too.
+                            t.GetInterfaces().Each(s => build = build.Keyed<object>(s.FullName!));
                         }
                     }
                 }

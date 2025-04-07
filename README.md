@@ -2,12 +2,8 @@
 
 Base Library used among all Big Ice Games projects.
 
-First of all you need to install <a href="https://github.com/GlitchEnzo/NuGetForUnity" target="_blank">`NuGetForUnity`</a>.
+## Installation
 
-After that open it through NuGet > Manage NuGet Packages.
-Search for <a href="https://github.com/autofac/Autofac" target="_blank">`Autofac`</a> and install it.
-
-Now you are ready to install BIG.
 Go to Window > Package Manager > Click plus `+` sign button in the left upper corner and select `Install Package from git URL`.
 Use this repository git url to download it : https://github.com/Big-Ice-Games/BIG.git.
 
@@ -38,11 +34,7 @@ public override void Register(ContainerBuilder containerBuilder)
 
 Application entry happening when you invoke <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/DI/God.cs" target="_blank">`CreateWorld`</a> in a God class.
 
-<<<<<<< HEAD
 You can use flexible chain creation like this:
-=======
-You can use flexible chin creation like this:
->>>>>>> 77aa29f5d759746d9dd4b6611d1edf763d589c3b
 
 ```
 using Autofac;
@@ -152,8 +144,5 @@ public class EventSubscriber : BaseBehaviour
 ```
 
 ## <a href="https://github.com/Big-Ice-Games/BIG/tree/main/Runtime/Utils" target="_blank">`Utils`</a>
-<<<<<<< HEAD
 Avoiding code duplication, we keep extensions with broad applications here and use them in other projects. Useful things that are independent of a specific application are found here.
-=======
-Avoiding code duplication, we keep extensions with broad applications here and use them in other projects. Useful things that are independent of a specific application are found here.
->>>>>>> 77aa29f5d759746d9dd4b6611d1edf763d589c3b
+
