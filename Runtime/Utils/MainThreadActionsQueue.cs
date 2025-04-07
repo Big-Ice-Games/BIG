@@ -13,60 +13,14 @@ using System.Collections.Generic;
 
 namespace BIG
 {
-    public class DelayedAction
-    {
-        public Action Action;
-        public float TimeToGo;
-        public DelayedAction(Action action, float timeToGo)
-        {
-            Action = action;
-            TimeToGo = timeToGo;
-        }
-    }
     /// <summary>
     /// Store actions and coroutines that can be executed in main game loop.
     /// </summary>
-    [Register(true)]
     public sealed class MainThreadActionsQueue : IDisposable
     {
         private readonly Queue<Action> _threadedActions = new Queue<Action>(48);
         private readonly Queue<IEnumerator> _coroutines = new Queue<IEnumerator>(24);
-        private readonly DelayedAction[] _delayedActions = new DelayedAction[24];
-
-        public void Enqueue(DelayedAction action)
-        {
-            lock (_delayedActions)
-            {
-                for (int i = 0; i < _delayedActions.Length; i++)
-                {
-                    if (_delayedActions[i] == null)
-                    {
-                        _delayedActions[i] = action;
-                        return;
-                    }
-                }
-            }
-        }
-
-        public void TickDelayedActions(float time)
-        {
-            lock (_delayedActions)
-            {
-                for (int i = 0; i < _delayedActions.Length; i++)
-                {
-                    var act = _delayedActions[i];
-                    if (act != null)
-                    {
-                        if ((act.TimeToGo -= time) <= 0)
-                        {
-                            act.Action?.Invoke();
-                            _delayedActions[i] = null;
-                        }
-                    }
-                }
-            }
-        }
-
+        
         public void Enqueue(Action action)
         {
             lock (_threadedActions)
@@ -115,9 +69,9 @@ namespace BIG
 
         public void Dispose()
         {
+            this.Log("Disposing...", LogLevel.Info);
             _coroutines.Clear();
             _threadedActions.Clear();
-            _delayedActions.Clear();
         }
     }
 }
