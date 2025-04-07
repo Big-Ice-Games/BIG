@@ -14,7 +14,7 @@ namespace BIG
     public sealed class BigAssemblyModule : ScriptableObject, IAssemblyModule
     {
         [field: SerializeField] public int Priority { get; }
-        [field: SerializeField] private Settings _settings;
+        public Settings Settings;
         public void Register(ContainerBuilder containerBuilder)
         {
             containerBuilder.Register(
@@ -23,7 +23,7 @@ namespace BIG
                 .Keyed<object>(typeof(MainThreadActionsQueue).FullName)
                 .SingleInstance();
 
-            containerBuilder.Register(s => _settings)
+            containerBuilder.Register(s => Settings)
                 .As<ISettings>()
                 .As<Settings>()
                 .Keyed<object>(typeof(ISettings).FullName)

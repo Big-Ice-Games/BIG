@@ -6,7 +6,9 @@
 #endregion
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 namespace BIG
@@ -23,6 +25,7 @@ namespace BIG
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void InitDependencies()
         {
+            AssertProjectStructure();
             Application.quitting += OnQuit;
             
             var modules = LoadAllAssemblyModules();
@@ -36,6 +39,52 @@ namespace BIG
                 .CreateWorld();
 
             AfterDependenciesInitialization();
+        }
+
+        /// <summary>
+        /// It creates Resources/Modules folder if it doesn't exist.
+        /// In this path it creates <see cref="Settings"/> and <see cref="BigAssemblyModule"/> objects if they don't exist.
+        /// </summary>
+        private static void AssertProjectStructure()
+        {
+            string resourcesPath = "Assets/Resources";
+            string modulesPath = Path.Combine(resourcesPath, "Modules");
+            
+            if (!AssetDatabase.IsValidFolder(resourcesPath))
+                AssetDatabase.CreateFolder("Assets", "Resources");
+
+            if (!AssetDatabase.IsValidFolder(modulesPath))
+                AssetDatabase.CreateFolder("Assets/Resources", "Modules");
+            
+            string settingsPath = "Assets/Resources/Modules/Settings.asset";
+
+            if (AssertFileInPath(settingsPath, out Settings settings))
+            {
+                settings.SteamAppId = 440;
+                EditorUtility.SetDirty(settings);
+            }
+            
+            string bigAssemblyModule = "Assets/Resources/Modules/BigAssemblyModule.asset";
+            if (AssertFileInPath(bigAssemblyModule, out BigAssemblyModule assemblyModule))
+            {
+                assemblyModule.Settings = settings;
+                EditorUtility.SetDirty(assemblyModule);
+            }
+            AssetDatabase.SaveAssets();
+        }
+
+        private static bool AssertFileInPath<T>(string path, out T instance) where T : ScriptableObject
+        {
+            if (!File.Exists(path))
+            {
+                instance = ScriptableObject.CreateInstance<T>();
+                AssetDatabase.CreateAsset(instance, path);
+                AssetDatabase.SaveAssets();
+                return true;
+            }
+
+            instance = null;
+            return false;
         }
         
         /// <summary> 
