@@ -18,6 +18,10 @@ namespace BIG
         static DefineInitializer()
         {
             GameInitializer.AssertProjectStructure();
+            
+            AssetDatabase.Refresh();
+            EditorUtility.FocusProjectWindow();
+            
             var settings = GameInitializer.GetSettings();
             if (settings.UseWorkbook)
                 AddDefineIfMissing(BIG_WORKBOOK);
@@ -157,7 +161,7 @@ namespace BIG
         internal static ISettings GetSettings()
         {
             var loaded = Resources.LoadAll<ScriptableObject>("BIG");
-            var settings = loaded.OfType<ISettings>().FirstOrDefault();
+            var settings = loaded.OfType<Settings>().FirstOrDefault();
             return settings;
         }
 
