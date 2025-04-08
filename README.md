@@ -146,3 +146,20 @@ public class EventSubscriber : BaseBehaviour
 ## <a href="https://github.com/Big-Ice-Games/BIG/tree/main/Runtime/Utils" target="_blank">`Utils`</a>
 Avoiding code duplication, we keep extensions with broad applications here and use them in other projects. Useful things that are independent of a specific application are found here.
 
+## Workbook
+
+The workbook is designed to convert spreadsheets into a runtime framework that can be used to create scriptable assets or other runtime features.
+
+It is used for game localization. To try it out, you need to define BIG_WORKBOOK in Project Settings > Player > Scripts Define Symbols.
+
+BIG_WORKBOOK should work by default. To disable it, go to Resources/Resources/BIG/Settings and set Use Workbook to false - otherwise it will be defined every time the project loads scripts.
+
+Now you can load the default dictionary into your project. Go to BIG > Workbook - Reload Dictionary.
+You can check how the dictionary is defined. To use your own dictionary for this feature, go to Resources/Resources/BIG/Settings and set your own Google Workbook dictionary ID.
+
+It must be publicly available and you can find this ID in your own link like this:
+
+Full link example: https://docs.google.com/spreadsheets/d/1rWbQgslF4K0RKB128MmoDhHlKUQbvL7MD08AdN2twAc/edit?gid=0#gid=0
+Id: 1rWbQgslF4K0RKB128MmoDhHlKUQbvL7MD08AdN2twAc
+
+Now you can use <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Workbook/Localization/Translator.cs" target="_blank">`Translator`</a> class or try to add <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Workbook/Localization/TranslatedText.cs" target="_blank">`TranslatedText`</a> component into your Text Mesh Pro Lable.
