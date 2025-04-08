@@ -18,15 +18,20 @@ namespace BIG
         static DefineInitializer()
         {
             GameInitializer.AssertProjectStructure();
-            
-            AssetDatabase.Refresh();
-            EditorUtility.FocusProjectWindow();
-            
-            var settings = GameInitializer.GetSettings();
-            if (settings.UseWorkbook)
-                AddDefineIfMissing(BIG_WORKBOOK);
-            else
-                RemoveDefineIfExists(BIG_WORKBOOK);
+
+            try
+            {
+                AssetDatabase.Refresh();
+                var settings = GameInitializer.GetSettings();
+                if (settings == null || settings.UseWorkbook)
+                    AddDefineIfMissing(BIG_WORKBOOK);
+                else
+                    RemoveDefineIfExists(BIG_WORKBOOK);
+            }
+            catch 
+            {
+                // Ignore.
+            }
         }
 
         private static void AddDefineIfMissing(string define)
