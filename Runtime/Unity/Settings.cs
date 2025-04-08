@@ -1,9 +1,5 @@
-#region license
-
 // Copyright (c) 2025, Big Ice Games
 // All rights reserved.
-
-#endregion
 
 using UnityEngine;
 
@@ -13,5 +9,9 @@ namespace BIG
     public class Settings : ScriptableObject, ISettings
     {
         [field: SerializeField] public uint SteamAppId { get; set; }
+
+#if BIG_WORKBOOK
+        [field: SerializeField] public string GoogleWorkbookDictionaryId { get; set; }
+#endif
     }
 }

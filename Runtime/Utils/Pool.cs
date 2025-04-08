@@ -1,9 +1,5 @@
-﻿#region license
-
-// Copyright (c) 2025, Bie Ice Games
+﻿// Copyright (c) 2025, Bie Ice Games
 // All rights reserved.
-
-#endregion
 
 using System;
 

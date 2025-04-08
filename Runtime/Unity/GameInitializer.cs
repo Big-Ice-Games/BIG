@@ -1,9 +1,5 @@
-#region license
-
 // Copyright (c) 2025, Big Ice Games
 // All rights reserved.
-
-#endregion
 
 using System.Collections.Generic;
 using System.IO;
@@ -16,6 +12,9 @@ namespace BIG
     [JetBrains.Annotations.UsedImplicitly]
     internal sealed class GameInitializer
     {
+        private const uint DEFAULT_STEAM_APP_ID = 440;
+        private const string DEFAULT_DICTIONARY_EXAMPLE = "1rWbQgslF4K0RKB128MmoDhHlKUQbvL7MD08AdN2twAc";
+        
         /// <summary>
         /// Create default <see cref="ILogger"/> implementation for Unity <see cref="UnityLogger"/>.
         /// Register all assembly modules defined in ResourcesModules folder.
@@ -51,23 +50,24 @@ namespace BIG
         private static void AssertProjectStructure()
         {
             string resourcesPath = "Assets/Resources";
-            string modulesPath = Path.Combine(resourcesPath, "Modules");
+            string modulesPath = Path.Combine(resourcesPath, "BIG");
             
             if (!AssetDatabase.IsValidFolder(resourcesPath))
                 AssetDatabase.CreateFolder("Assets", "Resources");
 
             if (!AssetDatabase.IsValidFolder(modulesPath))
-                AssetDatabase.CreateFolder("Assets/Resources", "Modules");
+                AssetDatabase.CreateFolder("Assets/Resources", "BIG");
             
-            string settingsPath = "Assets/Resources/Modules/Settings.asset";
+            string settingsPath = "Assets/Resources/BIG/Settings.asset";
 
             if (AssertFileInPath(settingsPath, out Settings settings))
             {
-                settings.SteamAppId = 440;
+                settings.SteamAppId = DEFAULT_STEAM_APP_ID;
+                settings.GoogleWorkbookDictionaryId = DEFAULT_DICTIONARY_EXAMPLE;
                 EditorUtility.SetDirty(settings);
             }
             
-            string bigAssemblyModule = "Assets/Resources/Modules/BigAssemblyModule.asset";
+            string bigAssemblyModule = "Assets/Resources/BIG/BigAssemblyModule.asset";
             if (AssertFileInPath(bigAssemblyModule, out BigAssemblyModule assemblyModule))
             {
                 assemblyModule.Settings = settings;
@@ -95,7 +95,7 @@ namespace BIG
         /// </summary>
         private static List<IAssemblyModule> LoadAllAssemblyModules()
         {
-            var loaded = Resources.LoadAll<ScriptableObject>("Modules");
+            var loaded = Resources.LoadAll<ScriptableObject>("BIG");
             var modules = loaded.OfType<IAssemblyModule>().ToList();
             return modules;
         }

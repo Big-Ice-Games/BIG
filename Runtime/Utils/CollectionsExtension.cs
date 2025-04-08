@@ -1,9 +1,5 @@
-﻿#region license
-
-// Copyright (c) 2025, Big Ice Games
+﻿// Copyright (c) 2025, Big Ice Games
 // All rights reserved.
-
-#endregion
 
 using System;
 using System.Collections;
@@ -600,6 +596,41 @@ namespace BIG
             return result;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AddOrModify<K, V>(this Dictionary<K, V> dictionary, K key, V value)
+        {
+            if (dictionary.ContainsKey(key))
+                dictionary[key] = value;
+            else
+                dictionary.Add(key, value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static V GetIfExists<K, V>(this Dictionary<K, V> dictionary, K key) where V : class
+        {
+            return dictionary.ContainsKey(key) ? dictionary[key] : default (V);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool GetIfExists<K, V>(this Dictionary<K, V> dictionary, K key, out V value) where V : class
+        {
+            if (dictionary.ContainsKey(key))
+            {
+                value = dictionary[key];
+                return true;
+            }
+            value = default;
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AddIfNotExists<K, V>(this Dictionary<K, V> dictionary, K key, V value)
+        {
+            if (dictionary.ContainsKey(key))
+                return;
+            dictionary.Add(key, value);
+        }
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveIfExists(this Hashtable hashTable, string key)
         {

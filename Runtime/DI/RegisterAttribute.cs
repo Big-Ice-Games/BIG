@@ -1,9 +1,5 @@
-﻿#region license
-
-// Copyright (c) 2025, Big Ice Games
+﻿// Copyright (c) 2025, Big Ice Games
 // All rights reserved.
-
-#endregion
 
 using System;
 
