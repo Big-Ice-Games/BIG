@@ -5,10 +5,63 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEngine;
 
 namespace BIG
 {
+    [InitializeOnLoad]
+    public static class DefineInitializer
+    {
+        private const string BIG_WORKBOOK = "BIG_WORKBOOK";
+
+        static DefineInitializer()
+        {
+            GameInitializer.AssertProjectStructure();
+            var settings = GameInitializer.GetSettings();
+            if (settings.UseWorkbook)
+                AddDefineIfMissing(BIG_WORKBOOK);
+            else
+                RemoveDefineIfExists(BIG_WORKBOOK);
+        }
+
+        private static void AddDefineIfMissing(string define)
+        {
+            var targetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
+            var nameBuildTarget = NamedBuildTarget.FromBuildTargetGroup(targetGroup);
+            string defines = PlayerSettings.GetScriptingDefineSymbols(nameBuildTarget);
+
+            if (!defines.Contains(define))
+            {
+                if (!string.IsNullOrEmpty(defines))
+                    defines += ";" + define;
+                else
+                    defines = define;
+
+                PlayerSettings.SetScriptingDefineSymbols(nameBuildTarget, defines);
+                Debug.Log($"[BIG] Added scripting define symbol: {define}");
+            }
+        }
+        
+        private static void RemoveDefineIfExists(string define)
+        {
+            var targetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
+            var namedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(targetGroup);
+            string defines = PlayerSettings.GetScriptingDefineSymbols(namedBuildTarget);
+
+            var defineList = defines.Split(';').ToList();
+
+            if (defineList.Contains(define))
+            {
+                defineList.Remove(define);
+                string newDefines = string.Join(";", defineList);
+                PlayerSettings.SetScriptingDefineSymbols(namedBuildTarget, newDefines);
+
+                Debug.Log($"[BIG] Removed scripting define symbol: {define}");
+            }
+        }
+    }
+    
     [JetBrains.Annotations.UsedImplicitly]
     internal sealed class GameInitializer
     {
@@ -47,7 +100,7 @@ namespace BIG
         /// It creates Resources/Modules folder if it doesn't exist.
         /// In this path it creates <see cref="Settings"/> and <see cref="BigAssemblyModule"/> objects if they don't exist.
         /// </summary>
-        private static void AssertProjectStructure()
+        internal static void AssertProjectStructure()
         {
             string resourcesPath = "Assets/Resources";
             string modulesPath = Path.Combine(resourcesPath, "BIG");
@@ -64,6 +117,7 @@ namespace BIG
             {
                 settings.SteamAppId = DEFAULT_STEAM_APP_ID;
                 settings.GoogleWorkbookDictionaryId = DEFAULT_DICTIONARY_EXAMPLE;
+                settings.UseWorkbook = true;
                 EditorUtility.SetDirty(settings);
             }
             
@@ -98,6 +152,13 @@ namespace BIG
             var loaded = Resources.LoadAll<ScriptableObject>("BIG");
             var modules = loaded.OfType<IAssemblyModule>().ToList();
             return modules;
+        }
+        
+        internal static ISettings GetSettings()
+        {
+            var loaded = Resources.LoadAll<ScriptableObject>("BIG");
+            var settings = loaded.OfType<ISettings>().FirstOrDefault();
+            return settings;
         }
 
         /// <summary>
