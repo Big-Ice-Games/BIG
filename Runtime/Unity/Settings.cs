@@ -9,9 +9,6 @@ namespace BIG
     public class Settings : ScriptableObject, ISettings
     {
         [field: SerializeField] public uint SteamAppId { get; set; }
-
-#if BIG_WORKBOOK
         [field: SerializeField] public string GoogleWorkbookDictionaryId { get; set; }
-#endif
     }
 }
