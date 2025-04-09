@@ -1,4 +1,4 @@
-﻿#if BIG_WORKBOOK
+﻿#if BIG_WORKBOOK || UNITY_EDITOR
 // Copyright (c) 2025, Big Ice Games
 // All rights reserved.
 
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using NPOI.OpenXml4Net.Exceptions;
 using NPOI.SS.UserModel;
 
-namespace BIG.Workbook
+namespace BIG.Editor.Workbook
 {
     internal class ExcelWorkbookConverter
     {

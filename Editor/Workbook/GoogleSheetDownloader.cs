@@ -1,4 +1,4 @@
-#if BIG_WORKBOOK
+#if BIG_WORKBOOK || UNITY_EDITOR
 
 // Copyright (c) 2025, Big Ice Games
 // All rights reserved.
@@ -8,7 +8,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace BIG.Workbook
+namespace BIG.Editor.Workbook
 {
     public static class GoogleSheetDownloader
     {

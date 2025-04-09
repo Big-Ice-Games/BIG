@@ -10,7 +10,11 @@ using UnityEngine;
 
 namespace BIG.Workbook
 {
-    public abstract class ScriptableCollection<T> : ScriptableObject, IInitializableCollection, IEnumerable<T>
+    public abstract class ScriptableCollection<T> : ScriptableObject,
+        #if UNITY_EDITOR
+        IInitializableCollection,
+        #endif
+        IEnumerable<T>
     {
         private const string BALANCE_PATH = "Assets/Resources/BIG/";
         [SerializeField] public T[] Entities;

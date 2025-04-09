@@ -1,4 +1,4 @@
-﻿#if BIG_WORKBOOK
+﻿#if BIG_WORKBOOK || UNITY_EDITOR
 
 // Copyright (c) 2025, Big Ice Games
 // All rights reserved.
@@ -10,8 +10,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using BIG.Workbook;
 
-namespace BIG.Workbook
+namespace BIG.Editor.Workbook
 {
     public class WorkbookClassMapper
     {

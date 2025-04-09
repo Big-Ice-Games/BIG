@@ -1,11 +1,11 @@
-﻿#if BIG_WORKBOOK
+﻿#if BIG_WORKBOOK || UNITY_EDITOR
 // Copyright (c) 2025, Big Ice Games
 // All rights reserved.
 
 using System;
 using System.Collections.Generic;
 
-namespace BIG.Workbook
+namespace BIG.Editor.Workbook
 {
     public static class WorkbookProxyExtension
     {

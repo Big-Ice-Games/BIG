@@ -5,16 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using UnityEditor;
-using UnityEditor.Build;
+//using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace BIG
 {
-    [InitializeOnLoad]
+    #if UNITY_EDITOR
+    [UnityEditor.InitializeOnLoad]
     public static class DefineInitializer
     {
         private const string BIG_WORKBOOK = "BIG_WORKBOOK";
@@ -25,7 +23,7 @@ namespace BIG
 
             try
             {
-                AssetDatabase.Refresh();
+                UnityEditor.AssetDatabase.Refresh();
                 var settings = GameInitializer.GetSettings();
                 if (settings == null || settings.UseWorkbook)
                     AddDefineIfMissing(BIG_WORKBOOK);
@@ -37,12 +35,12 @@ namespace BIG
                 // Ignore.
             }
         }
-
+        
         private static void AddDefineIfMissing(string define)
         {
-            var targetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
-            var nameBuildTarget = NamedBuildTarget.FromBuildTargetGroup(targetGroup);
-            string defines = PlayerSettings.GetScriptingDefineSymbols(nameBuildTarget);
+            var targetGroup = UnityEditor.EditorUserBuildSettings.selectedBuildTargetGroup;
+            var nameBuildTarget = UnityEditor.Build.NamedBuildTarget.FromBuildTargetGroup(targetGroup);
+            string defines = UnityEditor.PlayerSettings.GetScriptingDefineSymbols(nameBuildTarget);
 
             if (!defines.Contains(define))
             {
@@ -51,16 +49,16 @@ namespace BIG
                 else
                     defines = define;
 
-                PlayerSettings.SetScriptingDefineSymbols(nameBuildTarget, defines);
+                UnityEditor.PlayerSettings.SetScriptingDefineSymbols(nameBuildTarget, defines);
                 Debug.Log($"[BIG] Added scripting define symbol: {define}");
             }
         }
         
         private static void RemoveDefineIfExists(string define)
         {
-            var targetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
-            var namedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(targetGroup);
-            string defines = PlayerSettings.GetScriptingDefineSymbols(namedBuildTarget);
+            var targetGroup = UnityEditor.EditorUserBuildSettings.selectedBuildTargetGroup;
+            var namedBuildTarget = UnityEditor.Build.NamedBuildTarget.FromBuildTargetGroup(targetGroup);
+            string defines = UnityEditor.PlayerSettings.GetScriptingDefineSymbols(namedBuildTarget);
 
             var defineList = defines.Split(';').ToList();
 
@@ -68,12 +66,13 @@ namespace BIG
             {
                 defineList.Remove(define);
                 string newDefines = string.Join(";", defineList);
-                PlayerSettings.SetScriptingDefineSymbols(namedBuildTarget, newDefines);
+                UnityEditor.PlayerSettings.SetScriptingDefineSymbols(namedBuildTarget, newDefines);
 
                 Debug.Log($"[BIG] Removed scripting define symbol: {define}");
             }
         }
     }
+    #endif
     
     [JetBrains.Annotations.UsedImplicitly]
     internal sealed class GameInitializer
@@ -113,6 +112,7 @@ namespace BIG
             AfterDependenciesInitialization();
         }
 
+        #if UNITY_EDITOR
         /// <summary>
         /// It creates Resources/Modules folder if it doesn't exist.
         /// In this path it creates <see cref="Settings"/> and <see cref="BigAssemblyModule"/> objects if they don't exist.
@@ -122,11 +122,11 @@ namespace BIG
             string resourcesPath = "Assets/Resources";
             string modulesPath = Path.Combine(resourcesPath, "BIG");
             
-            if (!AssetDatabase.IsValidFolder(resourcesPath))
-                AssetDatabase.CreateFolder("Assets", "Resources");
+            if (!UnityEditor.AssetDatabase.IsValidFolder(resourcesPath))
+                UnityEditor.AssetDatabase.CreateFolder("Assets", "Resources");
 
-            if (!AssetDatabase.IsValidFolder(modulesPath))
-                AssetDatabase.CreateFolder("Assets/Resources", "BIG");
+            if (!UnityEditor.AssetDatabase.IsValidFolder(modulesPath))
+                UnityEditor.AssetDatabase.CreateFolder("Assets/Resources", "BIG");
             
             string settingsPath = "Assets/Resources/BIG/Settings.asset";
 
@@ -135,16 +135,17 @@ namespace BIG
                 settings.SteamAppId = DEFAULT_STEAM_APP_ID;
                 settings.GoogleWorkbookDictionaryId = DEFAULT_DICTIONARY_EXAMPLE;
                 settings.UseWorkbook = true;
-                EditorUtility.SetDirty(settings);
+                UnityEditor.EditorUtility.SetDirty(settings);
+                UnityEditor.AssetDatabase.SaveAssetIfDirty(settings);
             }
             
             string bigAssemblyModule = "Assets/Resources/BIG/BigAssemblyModule.asset";
             if (AssertFileInPath(bigAssemblyModule, out BigAssemblyModule assemblyModule))
             {
                 assemblyModule.Settings = settings;
-                EditorUtility.SetDirty(assemblyModule);
+                UnityEditor.EditorUtility.SetDirty(assemblyModule);
+                UnityEditor.AssetDatabase.SaveAssetIfDirty(assemblyModule);
             }
-            AssetDatabase.SaveAssets();
         }
 
         private static bool AssertFileInPath<T>(string path, out T instance) where T : ScriptableObject
@@ -152,14 +153,15 @@ namespace BIG
             if (!File.Exists(path))
             {
                 instance = ScriptableObject.CreateInstance<T>();
-                AssetDatabase.CreateAsset(instance, path);
-                AssetDatabase.SaveAssets();
+                UnityEditor.AssetDatabase.CreateAsset(instance, path);
+                UnityEditor.AssetDatabase.SaveAssets();
                 return true;
             }
 
             instance = null;
             return false;
         }
+        #endif
         
         /// <summary> 
         /// Load all Scriptable <see cref="IAssemblyModule"/> implementations from Resources/Modules folder.
