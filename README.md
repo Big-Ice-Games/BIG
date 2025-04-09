@@ -152,7 +152,7 @@ The workbook is designed to convert spreadsheets into a runtime framework that c
 
 It is used for game localization. To try it out, you need to define BIG_WORKBOOK in Project Settings > Player > Scripts Define Symbols.
 
-BIG_WORKBOOK should work by default. To disable it, go to Resources/Resources/BIG/Settings and set Use Workbook to false - otherwise it will be defined every time the project loads scripts.
+BIG_WORKBOOK should work by default. To disable it, go to Assets/Resources/BIG/Settings and set Use Workbook to false - otherwise it will be defined every time the project loads scripts.
 
 Now you can load the default dictionary into your project. Go to BIG > Workbook - Reload Dictionary.
 You can check how the dictionary is defined. To use your own dictionary for this feature, go to Resources/Resources/BIG/Settings and set your own Google Workbook dictionary ID.
@@ -163,3 +163,10 @@ Full link example: https://docs.google.com/spreadsheets/d/1rWbQgslF4K0RKB128MmoD
 Id: 1rWbQgslF4K0RKB128MmoDhHlKUQbvL7MD08AdN2twAc
 
 Now you can use <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Workbook/Localization/Translator.cs" target="_blank">`Translator`</a> class or try to add <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Workbook/Localization/TranslatedText.cs" target="_blank">`TranslatedText`</a> component into your Text Mesh Pro Lable.
+
+## Toolbar
+Based on <a href="https://github.com/marijnz/unity-toolbar-extender" target="_blank">`Unity Toolbar Extender`</a> I prepared flexible solution that you can extend.
+There are two examples <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Editor/Toolbar/ToolbarElements/ScenesDropdownToolbar.cs" target="_blank">`Scene Selection Dropdown`</a> and <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Editor/Toolbar/ToolbarElements/SettingsShortcutToolbar.cs" target="_blank">`Settings Shortcut`</a>.
+
+Based on that, using <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Editor/Toolbar/ToolbarElementAttribute.cs" target="_blank">`Toolbar Element Attribute`</a> you can prepare your own extensions.
+
