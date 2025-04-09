@@ -1,12 +1,16 @@
 // Copyright (c) 2025, Big Ice Games
 // All rights reserved.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEngine;
+using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace BIG
 {
@@ -95,10 +99,12 @@ namespace BIG
             Application.quitting += OnQuit;
             
             var modules = LoadAllAssemblyModules();
+            var sceneInjectors = LoadAllSceneInjectors();
             
             God.Ask()
                 .WithLogger(new UnityLogger())
                 .WithAssemblyModules(modules)
+                .WithSceneInjectors(sceneInjectors)
                 #if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
                 .WithStandaloneRegistration()
                 #endif
@@ -170,6 +176,13 @@ namespace BIG
             var loaded = Resources.LoadAll<ScriptableObject>("BIG");
             var settings = loaded.OfType<Settings>().FirstOrDefault();
             return settings;
+        }
+        
+        private static List<ISceneInjector> LoadAllSceneInjectors()
+        {
+            var loaded = Resources.FindObjectsOfTypeAll<Object>();
+            var sceneInjectors = loaded.OfType<ISceneInjector>().ToList();
+            return sceneInjectors;
         }
 
         /// <summary>

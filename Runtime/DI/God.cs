@@ -53,6 +53,16 @@ namespace BIG
             return _instance;
         }
 
+        public God WithSceneInjectors(List<ISceneInjector> sceneInjectors)
+        {
+            sceneInjectors.OrderBy(s => s.Priority).Each(s =>
+            {
+                Instance._modules++;
+                s.Register(Instance._builder);
+            });
+            return _instance;
+        }
+        
         public God WithAssemblyModules(IList<IAssemblyModule> assemblyModules)
         {
             assemblyModules.OrderBy(s => s.Priority).Each(s =>
