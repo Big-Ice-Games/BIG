@@ -86,6 +86,8 @@ namespace BIG
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void InitDependencies()
         {
+            // Because reflection extension caches assemblies also for Editor, we need to clear this cache when game is started.
+            ReflectionExtension.ClearCache();
             #if UNITY_EDITOR
             AssertProjectStructure();
             #endif

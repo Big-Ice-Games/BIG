@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Autofac;
 
 namespace BIG
@@ -18,43 +17,44 @@ namespace BIG
         private static God Instance => _instance ??= new God();
         private readonly ContainerBuilder _builder;
         private IContainer _container;
-        
+
         private int _modules;
         private int _automaticRegistration;
         private bool _logger;
-        
+
         private God()
         {
             _builder = new ContainerBuilder();
         }
 
         public static God Ask() => Instance;
+
         public God WithStandaloneRegistration()
         {
             Instance.StandaloneRegistration();
             return _instance;
         }
-        
+
         public God WithLogger(ILogger logger)
         {
             Instance._builder.Register(c => logger)
                 .As<ILogger>()
                 .Keyed<object>(typeof(ILogger).FullName!).SingleInstance();
-            
+
             Logger.InitLogger(logger);
             Instance._logger = true;
             return _instance;
         }
 
         public God WithAssemblyModule(IAssemblyModule assemblyModule)
-        { 
+        {
             assemblyModule.Register(Instance._builder);
             Instance._modules++;
             return _instance;
         }
-        
+
         public God WithAssemblyModules(IList<IAssemblyModule> assemblyModules)
-        { 
+        {
             assemblyModules.OrderBy(s => s.Priority).Each(s =>
             {
                 Instance._modules++;
@@ -69,30 +69,29 @@ namespace BIG
             {
                 throw new Exception("[GOD] World already created. You cannot create it again.");
             }
-            
+
             Instance._container = Instance._builder.Build();
 
             try
             {
                 // If there is no logger included then this will throw an exception.
-                ILogger logger = PrayFor<ILogger>(); 
+                ILogger logger = PrayFor<ILogger>();
                 Instance.Log($"World created:\n" +
-                             (Instance._logger ? 
-                                 "<color=green>Logger Assigned</color>\n" : 
-                                 "<color=red>Logger Unassigned</color>\n") +
+                             (Instance._logger
+                                 ? "<color=green>Logger Assigned</color>\n"
+                                 : "<color=red>Logger Unassigned</color>\n") +
                              $"Modules registered: {Instance._modules}\n" +
                              $"Types registered automatically: {Instance._automaticRegistration}");
             }
-            catch 
+            catch
             {
                 // Ignore if user decide to create world without logger.
             }
-            
+
             return Instance;
         }
-        
-        
-        
+
+
         /// <summary>
         /// Generic types' resolver.
         /// </summary>
@@ -110,7 +109,7 @@ namespace BIG
                 throw new Exception(msg);
             }
         }
-        
+
         /// <summary>
         /// Generic types' resolver for non-static usage.
         /// </summary>
@@ -158,79 +157,65 @@ namespace BIG
             Instance._container.Dispose();
             _instance = null;
         }
-        
+
         /// <summary>
         /// Fully automated registration. IDisposable is added manually because sometimes this interface is ignored by AsImplementedInterfaces function.
         /// This registration is not supported on mobile devices because resolving such instance is done by dynamic constructor compilation.
         /// </summary>
         private void StandaloneRegistration()
         {
-            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (TypeWithAttribute<RegisterAttribute> t in ReflectionExtension.GetAllTypesByAttribute<RegisterAttribute>())
             {
-                IEnumerable<Type> typesToRegister;
-                try
+                _automaticRegistration++;
+                bool singletone = t.Attribute.Singletone;
+                if (singletone)
                 {
-                    typesToRegister = assembly.GetTypes().Where(t => t.IsDefined(typeof(RegisterAttribute)));
-                }
-                catch
-                {
-                    // Ignore types loading exception
-                    continue;
-                }
-
-                foreach (Type t in typesToRegister)
-                {
-                    _automaticRegistration++;
-                    bool singletone = t.GetCustomAttribute<RegisterAttribute>(true).Singletone;
-                    if (singletone)
+                    if (t.Type.GetInterfaces().Contains(typeof(IDisposable)))
                     {
-                        if (t.GetInterfaces().Contains(typeof(IDisposable)))
-                        {
-                            var build = _builder.RegisterType(t)
-                                .AsSelf()
-                                .AsImplementedInterfaces()
-                                //.As<IDisposable>()
-                                .Keyed<object>(t.FullName!)
-                                .SingleInstance();
-                            
-                            // Use every interface as a key too.
-                            t.GetInterfaces().Each(s => build = build.Keyed<object>(s.FullName!));
-                        }
-                        else
-                        {
-                            var build = _builder.RegisterType(t)
-                                .AsSelf()
-                                .AsImplementedInterfaces()
-                                .Keyed<object>(t.FullName!)
-                                .SingleInstance();
-                            
-                            // Use every interface as a key too.
-                            t.GetInterfaces().Each(s => build = build.Keyed<object>(s.FullName!));
-                        }
+                        var build = _builder.RegisterType(t)
+                            .AsSelf()
+                            .AsImplementedInterfaces()
+                            .As<IDisposable>() // I notice that sometimes this interface is ignored by AsImplementedInterfaces function.
+                            .Keyed<object>(t.Type.FullName!)
+                            .SingleInstance();
+
+                        // Use every interface as a key too.
+                        t.Type.GetInterfaces().Each(s => build = build.Keyed<object>(s.FullName!));
                     }
                     else
                     {
-                        if (t.GetInterfaces().Contains(typeof(IDisposable)))
-                        {
-                            var build = _builder.RegisterType(t)
-                                .AsSelf()
-                                .AsImplementedInterfaces()
-                                //.As<IDisposable>()
-                                .Keyed<object>(t.FullName!);
-                            
-                            // Use every interface as a key too.
-                            t.GetInterfaces().Each(s => build = build.Keyed<object>(s.FullName!));
-                        }
-                        else
-                        {
-                            var build = _builder.RegisterType(t)
-                                .AsSelf()
-                                .AsImplementedInterfaces()
-                                .Keyed<object>(t.FullName!);
-                            
-                            // Use every interface as a key too.
-                            t.GetInterfaces().Each(s => build = build.Keyed<object>(s.FullName!));
-                        }
+                        var build = _builder.RegisterType(t)
+                            .AsSelf()
+                            .AsImplementedInterfaces()
+                            .Keyed<object>(t.Type.FullName!)
+                            .SingleInstance();
+
+                        // Use every interface as a key too.
+                        t.Type.GetInterfaces().Each(s => build = build.Keyed<object>(s.FullName!));
+                    }
+                }
+                else
+                {
+                    if (t.Type.GetInterfaces().Contains(typeof(IDisposable)))
+                    {
+                        var build = _builder.RegisterType(t)
+                            .AsSelf()
+                            .AsImplementedInterfaces()
+                            .As<IDisposable>() // I notice that sometimes this interface is ignored by AsImplementedInterfaces function.
+                            .Keyed<object>(t.Type.FullName!);
+
+                        // Use every interface as a key too.
+                        t.Type.GetInterfaces().Each(s => build = build.Keyed<object>(s.FullName!));
+                    }
+                    else
+                    {
+                        var build = _builder.RegisterType(t)
+                            .AsSelf()
+                            .AsImplementedInterfaces()
+                            .Keyed<object>(t.Type.FullName!);
+
+                        // Use every interface as a key too.
+                        t.Type.GetInterfaces().Each(s => build = build.Keyed<object>(s.FullName!));
                     }
                 }
             }

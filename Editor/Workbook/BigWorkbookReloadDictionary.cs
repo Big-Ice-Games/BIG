@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace BIG.Editor.Workbook
 {
-    public static class WorkbookReloader
+    public static class BigWorkbookReloadDictionary
     {
         [MenuItem("BIG/Workbook - Reload Dictionary")]
         public static async void DownloadAndProcessExcel()

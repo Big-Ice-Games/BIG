@@ -19,6 +19,12 @@ namespace BIG
         private const BindingFlags DEFAULT_FLAGS = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
 
         /// <summary>
+        /// If wew have multiple places where we need to get all types from assemblies we can cache them.
+        /// This cache is cleared at the start of the game and when we call <see cref="ClearCache"/> method because it is used by the Editor and by the game.
+        /// </summary>
+        private static List<Type> _cachedTypes = null;
+        
+        /// <summary>
         /// Gets fields with given attribute type.
         /// </summary>
         /// <typeparam name="T">Typeof class which you want to search in.</typeparam>
@@ -134,46 +140,138 @@ namespace BIG
         {
             return obj.GetType().GetMembers(DEFAULT_FLAGS).Where(f => f.IsDefined(typeof(TF), false)).ToArray();
         }
-
-        /// <summary>
-        /// Search assemblies for types decorated by given attribute.
-        /// </summary>
-        /// <typeparam name="T">Attribute type.</typeparam>
-        /// <returns>Array of types which are decorated by given attribute.</returns>
-        public static TypeWithAttribute<T>[] GetAllTypesByAttribute<T>() where T : Attribute
+        
+        public static void ClearCache()
         {
-            List<TypeWithAttribute<T>> result = new List<TypeWithAttribute<T>>(48);
+            _cachedTypes = null;
+        }
+        
+        public static List<Type> GetAllTypes()
+        {
+            if(_cachedTypes != null) return _cachedTypes;
+            
+            _cachedTypes = new List<Type>();
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                IEnumerable<Type> tmpTypes;
                 try
                 {
-                    tmpTypes = assembly.GetTypes().Where(t => t.IsDefined(typeof(T)));
-                    foreach (Type tmpType in tmpTypes)
-                    {
-                        T t = tmpType.GetCustomAttribute<T>(true);
-                        result.Add(new TypeWithAttribute<T>(tmpType, t));
-                    }
+                    var types = assembly.GetTypes();
+                    _cachedTypes.AddRange(types);
                 }
                 catch
                 {
-                    // Ignore assembly loading type exception.
+                    // Ignore types loading exception
                     continue;
                 }
             }
-            return result.ToArray();
+
+            return _cachedTypes;
+        }
+
+        public static IEnumerable<TypeWithAttribute<T>> GetAllTypesByAttribute<T>() where T : Attribute
+        {
+            var types = GetAllTypes().Where(t => t.IsDefined(typeof(T)));
+            foreach (Type type in types)
+            {
+                var attribute = type.GetCustomAttribute<T>(true);
+                if (attribute != null)
+                {
+                    yield return new TypeWithAttribute<T>(type, attribute);
+                }
+            }
+        }
+
+        public static IEnumerable<Type> FindTypesWithAttribute<T>() where T : Attribute
+        {
+            var types = GetAllTypes();
+            foreach (var type in types)
+            {
+                var attribute = type.GetCustomAttribute<T>();
+                if (attribute != null)
+                {
+                    yield return type;
+                }
+            }
+        }
+        
+        public static IEnumerable<MethodWithAttribute<T>> FindStaticMethodsWithAttribute<T>() where T : Attribute
+        {
+            var types = GetAllTypes();
+            foreach (var type in types)
+            {
+                foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+                {
+                    var attribute = method.GetCustomAttribute<T>();
+                    if (attribute != null)
+                    {
+                        yield return new MethodWithAttribute<T>(method, attribute);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Find methods decorated with T Attribute but only in given TT type.
+        /// </summary>
+        /// <typeparam name="T">Attribute type.</typeparam>
+        /// <typeparam name="TT">Instance type.</typeparam>
+        /// <returns>Methods with this attribute from TT type.</returns>
+        public static IEnumerable<MethodWithAttribute<T>> FindStaticMethodsWithAttribute<T, TT>() where T : Attribute where TT : Type
+        {
+            var methods = typeof(TT).GetMethods(BindingFlags.Static | BindingFlags.Public);
+
+            foreach (var m in methods)
+            {
+                var attr = m.GetCustomAttribute<T>();
+                if (attr != null)
+                {
+                    yield return new MethodWithAttribute<T>(m, attr);
+                }
+            }
         }
     }
 
     public struct TypeWithAttribute<T>
     {
-        public Type Type;
-        public T Attribute;
-
         public TypeWithAttribute(Type type, T attribute)
         {
             Type = type;
             Attribute = attribute;
+        }
+        
+        public readonly Type Type;
+        public readonly T Attribute;
+        
+        public static implicit operator Type(TypeWithAttribute<T> typeWithAttribute)
+        {
+            return typeWithAttribute.Type;
+        }
+        
+        public static implicit operator T(TypeWithAttribute<T> typeWithAttribute)
+        {
+            return typeWithAttribute.Attribute;
+        }
+    }
+    
+    public struct MethodWithAttribute<T>
+    {
+        public MethodWithAttribute(MethodInfo method, T attribute)
+        {
+            Method = method;
+            Attribute = attribute;
+        }
+
+        public readonly MethodInfo Method;
+        public readonly T Attribute;
+        
+        public static implicit operator MethodInfo(MethodWithAttribute<T> methodWithAttribute)
+        {
+            return methodWithAttribute.Method;
+        }
+        
+        public static implicit operator T(MethodWithAttribute<T> methodWithAttribute)
+        {
+            return methodWithAttribute.Attribute;
         }
     }
 }
