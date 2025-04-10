@@ -2,19 +2,47 @@
 
 Base Library used among all Big Ice Games projects.
 
-## Installation
+It provides a set of useful functions that can speed up your Unity project in many ways. It is a base library that will be used by subsequent - more specific - plugins [TBA] and will be used in the example game [TBA].
 
+* Dependency Injection features, based on <a href="https://github.com/autofac/Autofac" target="_blank">`Autofac`</a>. Built to work with Unity, but can also be used in other application layers such as server, web service, etc.
+* Well optimized, struct based Events that you can Raise and Subscribe to. Fast, optimized and extreamly easy to use.
+* Basic behavior designed for convenient use of DI and Events.
+* Flexible Dependency Registration. You can define your own assembly modules, scene injectors or use registration attribute for non-mobile devices.
+* A set of useful extensions that can be used to solve common problems in collections, networking, reflection, and more.
+* Workbook that can map Spreadsheet files into optimized runtime structure that can be used to import excel files into your project to build scriptable objects from them.
+* Translator created as an example of Workbook usage.
+* Editor toolbar that you can extend with your own toolbar elements.
+
+## Table of Contents
+- [Installation](#installation)
+- [Dependency Injection](#dependency-injection)
+- [Events](#events)
+- [Toolbar](#toolbar)
+
+Installation
+---
 Go to Window > Package Manager > Click plus `+` sign button in the left upper corner and select `Install Package from git URL`.
+![PackageInstallation_1](https://github.com/user-attachments/assets/98843125-4a81-487c-8911-cd711ff6dcd4)
 Use this repository git url to download it : https://github.com/Big-Ice-Games/BIG.git.
+![PackageInstallation_2](https://github.com/user-attachments/assets/809eb453-f3dc-4fd3-b47d-6f20569069cd)
 
-## <a href="https://github.com/Big-Ice-Games/BIG/tree/main/Runtime/DI" target="_blank">`DI`</a>
-Dependency injection is the backbone of Big Ice Games projects.
 
-First you are starting with <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/DI/AssemblyModule.cs" target="_blank">`AssemblyModule`</a> definition.
-For every assembly you can define one or more modules that will register injectable classes into your application.
+Dependency Injection
+---
+<a href="https://github.com/Big-Ice-Games/BIG/tree/main/Runtime/DI" target="_blank">`DI`</a> is the backbone of Big Ice Games projects.
 
-To make sure we avoid dynamic compilation that can occure with <a href="https://github.com/autofac/Autofac" target="_blank">`Autofac`</a>, we use a 
-"manual" registration approach. 
+The best way to start is to just run the project for the first time.
+<a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Unity/GameInitializer.cs" target="_blank">`Game Initializer`</a> should accomplish couple of easy steps.
+* Assert path Assets/Resources/BIG.
+* Create <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Unity/Settings.cs" target="_blank">`Settings`</a> asset in this path.
+* Create <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Unity/BigAssemblyModule.cs" target="_blank">`Big Assembly Module`</a> asset in this path.
+* Register <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Unity/UnityLogger.cs" target="_blank">`Unity Logger`</a>
+* Register all <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/DI/IAssemblyModule.cs" target="_blank">`Assembly modules`</a> placed in Assets/Resources/BIG/ in a same way like Big Assembly Module.
+* Register all <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Unity/ISceneInjector.cs" target="_blank">`Scene Injectors`</a> that you can use to register objects that are already on your starting scene.
+* Register all <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/DI/RegisterAttribute.cs" target="_blank">`Register Attribute`</a> decorated classes and structures that you have in your project. [ONLY FOR NON-MOBILE BUILDS]
+* Spawn new game object with <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Unity/MainThreadActionsExecutor.cs" target="_blank">`Main Thread Actions Executor`</a> and DontDestroyOnLoad option.
+
+Based on that flow you can define your own registered types, assemblies, scene injectors etc.
 
 $${\color{red}IMPORTANT}$$ - dynamic compilation does not work on some platforms. Especially mobile platforms.
 
@@ -29,47 +57,6 @@ public override void Register(ContainerBuilder containerBuilder)
         .SingleInstance();
 
    ...
-}
-```
-
-Application entry happening when you invoke <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/DI/God.cs" target="_blank">`CreateWorld`</a> in a God class.
-
-You can use flexible chain creation like this:
-
-```
-using Autofac;
-using BIG;
-using UnityEngine;
-
-public sealed class Initialization : MonoBehaviour
-{
-    [SerializeField] private Settings _settings;
-    private void Awake()
-    {
-        God.Ask()
-            .WithLogger(new UnityLogger())
-            .WithAssemblyModule(new MyCustomAssemblyModule(_settings))
-            .WithStandaloneRegistration().CreateWorld();
-
-        // Here you have your settings resolved from the container
-        var usageExample = God.PrayFor<ISettings>();
-    }
-    
-    private sealed class MyCustomAssemblyModule : AssemblyModule
-    {
-        private readonly ISettings _settings;
-        internal MyCustomAssemblyModule(ISettings settings)
-        {
-            _settings = settings;
-        }
-        public override void Register(ContainerBuilder containerBuilder)
-        {
-            containerBuilder.Register(c => _settings)
-                .As<ISettings>()
-                .Keyed<object>(typeof(ISettings).FullName)
-                .SingleInstance();
-        }
-    }
 }
 ```
 
@@ -97,6 +84,9 @@ public class Entity : BaseBehaviour
     [Inject] private ISettings _settings;
 }
 ```
+
+Events
+---
 
 <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Unity/BaseBehaviour.cs" target="_blank">`BaseBehaviour`</a> also handle <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Events/SubscribeAttribute.cs" target="_blank">`[Subscribe]`</a>
 automatically using extension methods. You can build your own version easly or use these extensions as you like.
@@ -143,6 +133,7 @@ public class EventSubscriber : BaseBehaviour
 }
 ```
 
+
 ## <a href="https://github.com/Big-Ice-Games/BIG/tree/main/Runtime/Utils" target="_blank">`Utils`</a>
 Avoiding code duplication, we keep extensions with broad applications here and use them in other projects. Useful things that are independent of a specific application are found here.
 
@@ -164,9 +155,14 @@ Id: 1rWbQgslF4K0RKB128MmoDhHlKUQbvL7MD08AdN2twAc
 
 Now you can use <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Workbook/Localization/Translator.cs" target="_blank">`Translator`</a> class or try to add <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Workbook/Localization/TranslatedText.cs" target="_blank">`TranslatedText`</a> component into your Text Mesh Pro Lable.
 
-## Toolbar
+Toolbar
+---
+![Toolbar](https://github.com/user-attachments/assets/222b5fda-ea5c-4efc-af25-e291e6ada4ae)
+
 Based on <a href="https://github.com/marijnz/unity-toolbar-extender" target="_blank">`Unity Toolbar Extender`</a> I prepared flexible solution that you can extend.
-There are two examples <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Editor/Toolbar/ToolbarElements/ScenesDropdownToolbar.cs" target="_blank">`Scene Selection Dropdown`</a> and <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Editor/Toolbar/ToolbarElements/SettingsShortcutToolbar.cs" target="_blank">`Settings Shortcut`</a>.
+There are two examples 
+* <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Editor/Toolbar/ToolbarElements/ScenesDropdownToolbar.cs" target="_blank">`Scene Selection Dropdown`</a>
+* <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Editor/Toolbar/ToolbarElements/SettingsShortcutToolbar.cs" target="_blank">`Settings Shortcut`</a>.
 
 Based on that, using <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Editor/Toolbar/ToolbarElementAttribute.cs" target="_blank">`Toolbar Element Attribute`</a> you can prepare your own extensions.
 
