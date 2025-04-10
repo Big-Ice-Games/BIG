@@ -17,7 +17,9 @@ It provides a set of useful functions that can speed up your Unity project in ma
 - [Installation](#installation)
 - [Dependency Injection](#dependency-injection)
 - [Events](#events)
+- [Utils](#utils)
 - [Toolbar](#toolbar)
+- [Translator](#translator)
 
 Installation
 ---
@@ -48,7 +50,7 @@ $${\color{red}IMPORTANT}$$ - dynamic compilation does not work on some platforms
 
 You can check how <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/DI/God.cs" target="_blank">`God`</a> handles registration of UnityLogger in `WithLogger` function or check example belowe.
 
-```
+```csharp
 public override void Register(ContainerBuilder containerBuilder)
 {
     containerBuilder.Register(c => new MainThreadActionQueue())
@@ -62,7 +64,7 @@ public override void Register(ContainerBuilder containerBuilder)
 
 You can inject your dependencies into Unity Game Objects through <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/DI/InjectAttribute.cs" target="_blank">`[InjectAttribute]`</a> and <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/DI/RuntimeDependencyProvider.cs" target="_blank">`RuntimeDependencyProvider`</a> like this
 
-```
+```csharp
 public class ExampleClass : MonoBehaviour
 {
   [Inject] private MainThreadActionsQueue _mainThreadActionsQueue;
@@ -75,7 +77,7 @@ public class ExampleClass : MonoBehaviour
 ```
 or use a base class like this:
 
-```
+```csharp
 public class Entity : BaseBehaviour
 {
     /// <summary>
@@ -91,7 +93,7 @@ Events
 <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Unity/BaseBehaviour.cs" target="_blank">`BaseBehaviour`</a> also handle <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Events/SubscribeAttribute.cs" target="_blank">`[Subscribe]`</a>
 automatically using extension methods. You can build your own version easly or use these extensions as you like.
 
-```
+```csharp
 this.ResolveMyDependencies(); // handle [Inject] attributes.
 protected virtual void OnEnable() => this.Subscribe(); // Handle [Subscribe] attributes.
 protected virtual void OnDisable() => this.Unsubscribe(); // Handle [Subscribe] attributes.
@@ -100,7 +102,7 @@ protected virtual void OnDisable() => this.Unsubscribe(); // Handle [Subscribe] 
 Subscribe attribute take advantage of a simple <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Events/Events.cs" target="_blank">`Events`</a> bus implementation without dynamic allocations.
 
 Raise event example: 
-```
+```csharp
 public readonly struct EventDataExample
 {
     public EventDataExample(Transform referenceTypeExample, int valueTypeExample)
@@ -122,7 +124,7 @@ public class EventPublisher : BaseBehaviour
 ```
 Subscriber example:
 
-```
+```csharp
 public class EventSubscriber : BaseBehaviour
 {
     [Subscribe]
@@ -133,20 +135,28 @@ public class EventSubscriber : BaseBehaviour
 }
 ```
 
+Utils
+---
+Avoiding code duplication, we keep extensions with broad applications here and use them in other projects.
+Useful things that are independent of a specific application are found here <a href="https://github.com/Big-Ice-Games/BIG/tree/main/Runtime/Utils" target="_blank">`Utils`</a>
 
-## <a href="https://github.com/Big-Ice-Games/BIG/tree/main/Runtime/Utils" target="_blank">`Utils`</a>
-Avoiding code duplication, we keep extensions with broad applications here and use them in other projects. Useful things that are independent of a specific application are found here.
+![utils](https://github.com/user-attachments/assets/0974a7ec-4db7-482f-a165-3bf4c62dbc1e)
 
-## Workbook
 
-The workbook is designed to convert spreadsheets into a runtime framework that can be used to create scriptable assets or other runtime features.
-
-It is used for game localization. To try it out, you need to define BIG_WORKBOOK in Project Settings > Player > Scripts Define Symbols.
-
+Translator
+---
+To try it out, you need to define BIG_WORKBOOK in Project Settings > Player > Scripts Define Symbols.
 BIG_WORKBOOK should work by default. To disable it, go to Assets/Resources/BIG/Settings and set Use Workbook to false - otherwise it will be defined every time the project loads scripts.
-
 Now you can load the default dictionary into your project. Go to BIG > Workbook - Reload Dictionary.
+![reload_dictionary](https://github.com/user-attachments/assets/568b05ba-e72f-4c3c-a04e-06f314fd6e22)
+
+After that your BIG folder should looks like this
+
+![Resources](https://github.com/user-attachments/assets/fab80a57-2be2-4286-a818-cd672ee0cbaf)
+
 You can check how the dictionary is defined. To use your own dictionary for this feature, go to Resources/Resources/BIG/Settings and set your own Google Workbook dictionary ID.
+
+![Settings](https://github.com/user-attachments/assets/a52a6622-db84-45c9-92e5-71e0784b0a92)
 
 It must be publicly available and you can find this ID in your own link like this:
 
@@ -154,6 +164,7 @@ Full link example: https://docs.google.com/spreadsheets/d/1rWbQgslF4K0RKB128MmoD
 Id: 1rWbQgslF4K0RKB128MmoDhHlKUQbvL7MD08AdN2twAc
 
 Now you can use <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Workbook/Localization/Translator.cs" target="_blank">`Translator`</a> class or try to add <a href="https://github.com/Big-Ice-Games/BIG/blob/main/Runtime/Workbook/Localization/TranslatedText.cs" target="_blank">`TranslatedText`</a> component into your Text Mesh Pro Lable.
+
 
 Toolbar
 ---
