@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) 2025, Big Ice Games
+// All rights reserved.
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -20,14 +23,14 @@ namespace BIG
         public static IObservableCollection<T> Create(int capacity) => new ObservableCollection<T>(capacity);
         
         [Serializable]
-        private class ObservableCollection<G> : IList<G>, IObservableCollection<G>
+        private class ObservableCollection<TG> : IList<TG>, IObservableCollection<TG>
         {
-            private readonly IList<G> _list;
-            public event Action<IList<G>> OnChanged = delegate { };
-            internal ObservableCollection(IList<G> initialList) => _list = initialList ?? new List<G>();
-            internal ObservableCollection(int capacity) => _list = new List<G>(capacity);
+            private readonly IList<TG> _list;
+            public event Action<IList<TG>> OnChanged = delegate { };
+            internal ObservableCollection(IList<TG> initialList) => _list = initialList ?? new List<TG>();
+            internal ObservableCollection(int capacity) => _list = new List<TG>(capacity);
     
-            public G this[int index]
+            public TG this[int index]
             {
                 get => _list[index];
                 set
@@ -40,7 +43,7 @@ namespace BIG
             public int Count => _list.Count;
             public bool IsReadOnly => _list.IsReadOnly;
     
-            public void Add(G item)
+            public void Add(TG item)
             {
                 _list.Add(item);
                 OnChanged?.Invoke(_list);
@@ -52,23 +55,23 @@ namespace BIG
                 OnChanged?.Invoke(_list);
             }
     
-            public bool Contains(G item) => _list.Contains(item);
+            public bool Contains(TG item) => _list.Contains(item);
     
-            public void CopyTo(G[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
+            public void CopyTo(TG[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
     
-            public bool Remove(G item)
+            public bool Remove(TG item)
             {
                 var result = _list.Remove(item);
                 if (result) OnChanged?.Invoke(_list);
                 return result;
             }
     
-            public IEnumerator<G> GetEnumerator() => _list.GetEnumerator();
+            public IEnumerator<TG> GetEnumerator() => _list.GetEnumerator();
             IEnumerator IEnumerable.GetEnumerator() => _list.GetEnumerator();
     
-            public int IndexOf(G item) => _list.IndexOf(item);
+            public int IndexOf(TG item) => _list.IndexOf(item);
     
-            public void Insert(int index, G item)
+            public void Insert(int index, TG item)
             {
                 _list.Insert(index, item);
                 OnChanged?.Invoke(_list);
@@ -76,7 +79,7 @@ namespace BIG
     
             public void RemoveAt(int index)
             {
-                G item = _list[index];
+                TG item = _list[index];
                 _list.RemoveAt(index);
                 OnChanged?.Invoke(_list);
             }
