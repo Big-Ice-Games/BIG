@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <RootNamespace>BIG</RootNamespace>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <!-- Big Ice Games internal layout: the BIG.Unity plugin project next to this repository.
+         When it is not there (external clone of BIG alone), the post-build copy is skipped entirely. -->
+    <UnityPackagesDir>$(MSBuildProjectDirectory)\..\BIG.Unity\Assets\BIG.Unity\Packages</UnityPackagesDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Autofac">
+      <HintPath>Packages\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>Packages\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Copy built dll into the Unity plugin after every build (Debug also copies the pdb for debugging).
+       Runs only when the BIG.Unity project exists next to this repository — external clones build without it. -->
+  <Target Name="CopyToUnityPlugin" AfterTargets="Build" Condition="Exists('$(UnityPackagesDir)')">
+    <ItemGroup>
+      <UnityPluginFiles Include="$(TargetPath)" />
+      <UnityPluginFiles Include="$(TargetDir)$(TargetName).pdb" Condition="'$(Configuration)' == 'Debug'" />
+    </ItemGroup>
+    <Copy SourceFiles="@(UnityPluginFiles)" DestinationFolder="$(UnityPackagesDir)" SkipUnchangedFiles="true" />
+    <!-- Release must not leave a stale Debug pdb (nor its orphaned Unity .meta) next to the dll. -->
+    <Delete Files="$(UnityPackagesDir)\$(TargetName).pdb;$(UnityPackagesDir)\$(TargetName).pdb.meta" Condition="'$(Configuration)' != 'Debug'" />
+    <Message Importance="high" Text="[BIG] $(Configuration) -> copied %(UnityPluginFiles.Filename)%(UnityPluginFiles.Extension) to $(UnityPackagesDir)" />
+  </Target>
+
+</Project>
