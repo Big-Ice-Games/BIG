@@ -32,15 +32,22 @@ namespace BIG
     /// Marker for user-data key providers. Implement it on a top-level, NON-SEALED class exposing keys
     /// as public static readonly <see cref="UserDataKey"/> fields, e.g.:
     /// <code>
-    /// public class SoundKeys : IUserDataKeysProvider
+    /// public class SoundUserDataKeysProvider : IUserDataKeysProvider
     /// {
+    ///     public string Name => "Sound"; // Entry point name in the generated Keys class.
     ///     public static readonly UserDataKey MusicLevel = new UserDataKey("Sound.MusicLevel");
     /// }
     /// </code>
     /// The BIG > Generate User Keys editor tool collects every implementation and generates a single
-    /// game-side entry point, so all keys are reachable as Keys.SoundKeys.MusicLevel etc.
+    /// game-side entry point, so all keys are reachable as Keys.Sound.MusicLevel etc.
+    /// Requirements: top-level, non-sealed, non-abstract class with a parameterless constructor
+    /// (the generator instantiates it to read <see cref="Name"/>).
     /// </summary>
-    public interface IUserDataKeysProvider { }
+    public interface IUserDataKeysProvider
+    {
+        /// <summary> Name of the generated entry point (Keys.{Name}). Must be a valid C# identifier. </summary>
+        string Name { get; }
+    }
 
     /// <summary> Interface to manage persistent user data, like player preferences or game settings. </summary>
     public interface IUserData
