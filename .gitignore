@@ -427,3 +427,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# BIG: /Packages holds vendored third-party dlls (Autofac, Newtonsoft.Json) — it is NOT a NuGet packages folder,
+# so re-include it despite the '**/[Pp]ackages/*' NuGet rule above. Required to build a fresh clone.
+!/[Pp]ackages/*
